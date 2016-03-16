@@ -3,7 +3,7 @@
       _MainTex("Base (RGB) Trans (A)", 2D) = "white" {} 
       _Color ("Main Color", Color) = (0,0,0,0) 
       _MaskTex("Mask Texture (RGB)", 2D) = "white" {} 
-      _CutOff("_CutOff", Range(0,5) ) = 0.5 
+      _CutOff("_CutOff", Range(0,1) ) = 0.5 
     } 
     Subshader { 
       Tags { 

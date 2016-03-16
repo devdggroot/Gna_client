@@ -15,10 +15,7 @@ public class MouseCoord : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 	
-        if( gui != null)
-        {
-            Vector3 pos = Input.mousePosition;
-            gui.text = "mouse position: " + pos.x + ", " + pos.y;
-        }
+        Vector3 pos = Input.mousePosition;
+        gui.text = "mouse position: " + pos.x + ", " + pos.y;
 	}
 }
