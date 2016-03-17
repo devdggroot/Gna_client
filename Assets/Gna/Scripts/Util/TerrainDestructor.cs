@@ -7,7 +7,7 @@ public class TerrainDestructor : MonoBehaviour
     public float thetaScale = 0.01f;  //limit?
     public float radius = 0.4f;
 
-    public int resolution = 4;
+    public int resolution = 2;
     public float sensitive = 0.2f;
 
     LineRenderer lineRenderer;
@@ -70,5 +70,9 @@ public class TerrainDestructor : MonoBehaviour
                 }
             }
         }
+
+        if (Input.GetMouseButtonDown(1))
+            for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
+                destructibleTerrains[i].DebugCheckPixels();
     }
 }

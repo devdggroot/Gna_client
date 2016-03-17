@@ -99,16 +99,16 @@ public class DestructibleTerrain : MonoBehaviour
         
         radius = radius * pixelsPerUnit;
         float radiusSq = radius * radius;
-        
-        for (int x = Mathf.Clamp(xPos - (int)radius, 0, mask.width), xmax = Mathf.Clamp(xPos + (int)radius, 0, mask.width); x < xmax; x += resolution)
+
+        for (int y = Mathf.Clamp(yPos - (int)radius, 0, mask.height), ymax = Mathf.Clamp(yPos + (int)radius, 0, mask.height); y < ymax; y += resolution)
         {
-            for (int y = Mathf.Clamp(yPos - (int)radius, 0, mask.height), ymax = Mathf.Clamp(yPos + (int)radius, 0, mask.height); y < ymax; y += resolution)
+            for (int x = Mathf.Clamp(xPos - (int)radius, 0, mask.width), xmax = Mathf.Clamp(xPos + (int)radius, 0, mask.width); x < xmax; x += resolution)
             {
                 float xDiff = x - xPos;
                 float yDiff = y - yPos;
                 float diffSq = xDiff * xDiff + yDiff * yDiff;
 
-                if (diffSq < radiusSq)
+                if (diffSq <= radiusSq)
                 {
                     //float a = Mathf.Cos(Mathf.Lerp(0f, Mathf.PI * 0.5f, diffSq / radiusSq));
 
@@ -116,13 +116,16 @@ public class DestructibleTerrain : MonoBehaviour
                     {
                         for (int j = 0; j < resolution; ++j)
                         {
-                            int idx = (x + i) + (y + j) * mask.width;
-                            Color col = pixels[idx];
+                            int idx = (x + j) + (y + i) * mask.width;
+                            if( idx < pixels.Length)
+                            {
+                                Color col = pixels[idx];
 
-                            col.g = 0f;
-                            col.a = 1f;//a;
+                                col.g = 0f;
+                                col.a = 1f;//a;
 
-                            pixels[idx] = col;
+                                pixels[idx] = col;
+                            }
                         }
                     }
                 }
@@ -131,5 +134,14 @@ public class DestructibleTerrain : MonoBehaviour
 
         mask.SetPixels(pixels);
         mask.Apply();
+    }
+
+    public void DebugCheckPixels()
+    {
+        for( int i = 0, imax = pixels.Length; i < imax; ++i)
+        {
+            if (pixels[i].g > 0)
+                Debug.Log("color g -> idx" + i);
+        }
     }
 }
