@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(SpriteRenderer))]
-public class DestructibleTerrain : MonoBehaviour
+public class DestructibleTerrain : PixelCollider
 {
-    public Texture2D raw;
     SpriteRenderer spriteRenderer;
 
     Texture2D mask;
@@ -24,22 +22,15 @@ public class DestructibleTerrain : MonoBehaviour
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (raw != null) //sprite
-        {
-            Sprite sprite = Sprite.Create(raw, new Rect(0f, 0f, raw.width, raw.height), new Vector2(0.5f, 0.5f));
-            spriteRenderer.sprite = sprite;
+        
+        mask = CreateMask(spriteRenderer.sprite.texture);
+        pixels = mask.GetPixels();
 
-            mask = CreateMask(raw);
-            pixels = mask.GetPixels();
-
-            spriteRenderer.material.SetTexture("_MaskTex", mask); //instance material
-        }
+        spriteRenderer.material.SetTexture("_Alpha", mask); //instance material
     }
 
     void OnDestroy()
     {
-        raw = null;
-
         pixels = null;
         if (mask != null)
             Destroy(mask);
@@ -61,7 +52,7 @@ public class DestructibleTerrain : MonoBehaviour
         {
             Color[] cols = raw.GetPixels();
 
-            Texture2D newTex = new Texture2D(raw.width, raw.height, TextureFormat.RGBA32, false);
+            Texture2D newTex = new Texture2D(raw.width, raw.height, TextureFormat.Alpha8, false);
             Color[] newCols = new Color[raw.width * raw.height];
 
             for (int y = 0, ymax = raw.height; y < ymax; ++y)
@@ -70,7 +61,7 @@ public class DestructibleTerrain : MonoBehaviour
                 {
                     int idx = x + y * xmax;
                     if (cols[idx].a > 0f)
-                        newCols[idx] = new Color(0f, 1f, 0f, 0f);
+                        newCols[idx] = new Color(0f, 0f, 0f, 1f);
 
                     else
                         newCols[idx] = Color.clear;
@@ -110,7 +101,7 @@ public class DestructibleTerrain : MonoBehaviour
 
                 if (diffSq <= radiusSq)
                 {
-                    //float a = Mathf.Cos(Mathf.Lerp(0f, Mathf.PI * 0.5f, diffSq / radiusSq));
+                    //float a = Mathf.Sin(Mathf.Lerp(0f, Mathf.PI * 0.5f, diffSq / radiusSq) * 0.04f);
 
                     for (int i = 0; i < resolution; ++i)
                     {
@@ -119,12 +110,8 @@ public class DestructibleTerrain : MonoBehaviour
                             int idx = (x + j) + (y + i) * mask.width;
                             if( idx < pixels.Length)
                             {
-                                Color col = pixels[idx];
-
-                                col.g = 0f;
-                                col.a = 1f;//a;
-
-                                pixels[idx] = col;
+                                //if( a < pixels[idx].a)
+                                    pixels[idx].a = 0f;
                             }
                         }
                     }
@@ -138,10 +125,6 @@ public class DestructibleTerrain : MonoBehaviour
 
     public void DebugCheckPixels()
     {
-        for( int i = 0, imax = pixels.Length; i < imax; ++i)
-        {
-            if (pixels[i].g > 0)
-                Debug.Log("color g -> idx" + i);
-        }
+        
     }
 }

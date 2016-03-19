@@ -71,8 +71,8 @@ public class TerrainDestructor : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
-            for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
-                destructibleTerrains[i].DebugCheckPixels();
+        //if (Input.GetMouseButtonDown(1))
+         //   for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
+          //      destructibleTerrains[i].DebugCheckPixels();
     }
 }
