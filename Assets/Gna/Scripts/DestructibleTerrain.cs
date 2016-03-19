@@ -26,7 +26,7 @@ public class DestructibleTerrain : PixelCollider
         mask = CreateMask(spriteRenderer.sprite.texture);
         pixels = mask.GetPixels();
 
-        spriteRenderer.material.SetTexture("_Alpha", mask); //instance material
+        spriteRenderer.material.SetTexture("_AlphaTex", mask); //instance material
     }
 
     void OnDestroy()
