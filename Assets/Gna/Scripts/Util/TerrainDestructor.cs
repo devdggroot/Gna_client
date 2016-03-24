@@ -36,7 +36,6 @@ public class TerrainDestructor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         float theta = 0f;
         int size = (int)((2f * Mathf.PI) / thetaScale) + 1;
         lineRenderer.SetVertexCount(size);
@@ -61,18 +60,22 @@ public class TerrainDestructor : MonoBehaviour
             float dist = Vector3.Distance(lastDestroyedPos, pos);
             if (dist > sensitive || Input.GetMouseButtonDown(0))
             {
-                if (destructibleTerrains != null)
-                {
-                    for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
-                        destructibleTerrains[i].Destroyed(pos, radius, resolution);
-
-                    lastDestroyedPos = pos;
-                }
+                TerrainRoot.instance.Destoryed(pos, radius, resolution);
+                lastDestroyedPos = pos;
             }
         }
 
-        //if (Input.GetMouseButtonDown(1))
-         //   for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
-          //      destructibleTerrains[i].DebugCheckPixels();
+        if (Input.GetMouseButtonDown(1))
+        {
+            for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
+            {
+                PixelCollider.RaycastHit hit = null;
+                if( TerrainRoot.instance.Raycast( pos, new Vector3( pos.x, pos.y - 1000f, 0f), ref hit))
+                {
+                    Debug.Log( "hit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.distSq);
+                    hit = null;
+                }
+            }
+        }
     }
 }

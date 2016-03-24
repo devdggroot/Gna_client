@@ -3,10 +3,7 @@ using System.Collections;
 
 public class DestructibleTerrain : PixelCollider
 {
-    SpriteRenderer spriteRenderer;
-
-    Texture2D mask;
-    Color[] pixels; //collision info
+    protected Texture2D mask;
 
     void OnEnable()
     {
@@ -19,9 +16,9 @@ public class DestructibleTerrain : PixelCollider
     }
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        base.Start();
         
         mask = CreateMask(spriteRenderer.sprite.texture);
         pixels = mask.GetPixels();
@@ -29,15 +26,18 @@ public class DestructibleTerrain : PixelCollider
         spriteRenderer.material.SetTexture("_AlphaTex", mask); //instance material
     }
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        spriteRenderer.material = null; //instance material
         pixels = null;
+
         if (mask != null)
             Destroy(mask);
+
         mask = null;
 
-        spriteRenderer.sprite = null;
-        spriteRenderer.material = null; //instance material
+        Debug.Log("DestructibleTerrain::OnDestroy");
+        base.OnDestroy();
     }
 
     // Update is called once per frame
@@ -78,17 +78,8 @@ public class DestructibleTerrain : PixelCollider
         return null;
     }
 
-    public void Destroyed(Vector3 worldPoint, float radius, int resolution)
+    public override void Destroyed(int xPos, int yPos, float radius, int resolution)
     {
-        Vector3 localPoint = transform.InverseTransformPoint(worldPoint);
-
-        Bounds bounds = spriteRenderer.sprite.bounds;
-        float pixelsPerUnit = spriteRenderer.sprite.pixelsPerUnit;
-
-        int xPos = (int)((localPoint.x + bounds.extents.x) * pixelsPerUnit);
-        int yPos = (int)((localPoint.y + bounds.extents.y) * pixelsPerUnit);
-        
-        radius = radius * pixelsPerUnit;
         float radiusSq = radius * radius;
 
         for (int y = Mathf.Clamp(yPos - (int)radius, 0, mask.height), ymax = Mathf.Clamp(yPos + (int)radius, 0, mask.height); y < ymax; y += resolution)
@@ -101,7 +92,7 @@ public class DestructibleTerrain : PixelCollider
 
                 if (diffSq <= radiusSq)
                 {
-                    //float a = Mathf.Sin(Mathf.Lerp(0f, Mathf.PI * 0.5f, diffSq / radiusSq) * 0.04f);
+                    float alpha = 0f;//Mathf.Sin(Mathf.Lerp(0f, Mathf.PI * 0.5f, diffSq / radiusSq) * 0.04f);
 
                     for (int i = 0; i < resolution; ++i)
                     {
@@ -110,8 +101,8 @@ public class DestructibleTerrain : PixelCollider
                             int idx = (x + j) + (y + i) * mask.width;
                             if( idx < pixels.Length)
                             {
-                                //if( a < pixels[idx].a)
-                                    pixels[idx].a = 0f;
+                                if (alpha < pixels[idx].a)
+                                    pixels[idx].a = alpha;
                             }
                         }
                     }
@@ -121,10 +112,5 @@ public class DestructibleTerrain : PixelCollider
 
         mask.SetPixels(pixels);
         mask.Apply();
-    }
-
-    public void DebugCheckPixels()
-    {
-        
     }
 }

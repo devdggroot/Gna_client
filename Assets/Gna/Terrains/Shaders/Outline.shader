@@ -110,4 +110,5 @@
 			ENDCG
 		}
 	}
+	Fallback "AlphaMask/Basic"
 }
