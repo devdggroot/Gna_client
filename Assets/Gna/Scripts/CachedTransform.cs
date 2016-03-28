@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TerrainObject : MonoBehaviour {
+public class CachedTransform : MonoBehaviour {
 
     public Transform cachedTransform { get; private set; }
 
@@ -17,9 +17,7 @@ public class TerrainObject : MonoBehaviour {
     }
 
     // Update is called once per frame
-    /*void Update () {
+    void Update () {
 	
-	}*/
-
-    public virtual void Destroyed(int xPos, int yPos, float radius, int resolution) { }
+	}
 }

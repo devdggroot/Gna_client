@@ -5,16 +5,22 @@ using System.Collections.Generic;
 
 public class NormalRenderer : MonoBehaviour {
 
-    public int resolution = 100;
+    public int resolution { get; private set; }
+    public int changeResolution
+    {
+        set
+        {
+            if (resolution != value)
+                resolution = value;
+        }
+    }
+
     public PixelCollider forNormal;
 
     // Use this for initialization
     void Start () {
 
         
-
-        List<Vector2> edges = FindEdge(resolution);
-        DrawNormal(edges);
     }
 
     void OnDestroy()
@@ -25,6 +31,18 @@ public class NormalRenderer : MonoBehaviour {
     void Update () {
 	
 	}
+
+    public void Clear()
+    {
+        while (transform.childCount > 0)
+            DestroyImmediate(transform.GetChild(0).gameObject);
+    }
+
+    public void Draw()
+    {
+        List<Vector2> edges = FindEdge(resolution);
+        DrawNormal(edges);
+    }
 
     List<Vector2> FindEdge( int resolution)
     {
@@ -90,10 +108,7 @@ public class NormalRenderer : MonoBehaviour {
     {
         if (forNormal != null)
         {
-            foreach (Transform child in transform)
-            {
-                Destroy(child);
-            }
+            Clear();
 
             for (int i = 0, imax = edges.Count; i < imax; ++i)
             {

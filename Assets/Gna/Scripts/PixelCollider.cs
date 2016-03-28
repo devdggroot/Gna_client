@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class PixelCollider : TerrainObject
+public class PixelCollider : TerrainProperty
 {
     public class RaycastHit
     {
