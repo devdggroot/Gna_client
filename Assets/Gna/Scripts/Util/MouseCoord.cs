@@ -9,7 +9,7 @@ public class MouseCoord : MonoBehaviour {
     GUIText gui;
     StringBuilder contents;
 
-    public PixelCollider terrain; 
+    public PixelCollider forPixelCoord; 
 
 	// Use this for initialization
 	void Start () {
@@ -32,19 +32,19 @@ public class MouseCoord : MonoBehaviour {
         Vector3 pos = Input.mousePosition;
         contents.AppendLine("mouse position: " + pos.x + ", " + pos.y);
 
-        if (terrain != null)
+        if (forPixelCoord != null)
         {
             pos = Camera.main.ScreenToWorldPoint(pos);
 
-            Vector3 local = terrain.cachedTransform.InverseTransformPoint(pos);
+            Vector3 local = forPixelCoord.cachedTransform.InverseTransformPoint(pos);
 
-            Bounds bounds = terrain.bounds;
-            float pixelsPerUnit = terrain.pixelsPerUnit;
+            Bounds bounds = forPixelCoord.bounds;
+            float pixelsPerUnit = forPixelCoord.pixelsPerUnit;
 
             int xPos = (int)((local.x + bounds.extents.x) * pixelsPerUnit);
             int yPos = (int)((local.y + bounds.extents.y) * pixelsPerUnit);
 
-            contents.AppendLine(terrain.name + "(linked terrain) pixel coord : " + xPos + ", " + yPos);
+            contents.AppendLine(forPixelCoord.name + "(linked terrain) pixel coord : " + xPos + ", " + yPos);
         }
 
         gui.text = contents.ToString();

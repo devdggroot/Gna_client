@@ -11,26 +11,17 @@ public class TerrainDestructor : MonoBehaviour
     public float sensitive = 0.2f;
 
     LineRenderer lineRenderer;
-
     Vector3 lastDestroyedPos;
-    DestructibleTerrain[] destructibleTerrains;
 
     // Use this for initialization
     void Start()
     {
-
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.SetWidth(0.02f, 0.02f);
-
-        //setup tag or layer...
-        GameObject go = GameObject.Find("[Terrain] Root");
-        if (go != null)
-            destructibleTerrains = go.GetComponentsInChildren<DestructibleTerrain>();
     }
 
     void OnDestroy()
     {
-        destructibleTerrains = null;
     }
 
     // Update is called once per frame
@@ -67,14 +58,11 @@ public class TerrainDestructor : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            for (int i = 0, imax = destructibleTerrains.Length; i < imax; ++i)
+            PixelCollider.RaycastHit hit = null;
+            if (TerrainRoot.instance.Raycast(pos, new Vector3(pos.x, pos.y - 1000f, 0f), ref hit))
             {
-                PixelCollider.RaycastHit hit = null;
-                if( TerrainRoot.instance.Raycast( pos, new Vector3( pos.x, pos.y - 1000f, 0f), ref hit))
-                {
-                    Debug.Log( "hit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.distSq);
-                    hit = null;
-                }
+                Debug.Log("hit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.distSq);
+                hit = null;
             }
         }
     }

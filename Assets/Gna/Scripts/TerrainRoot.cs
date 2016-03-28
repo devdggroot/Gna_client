@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TerrainRoot : MonoBehaviour {
-
+public class TerrainRoot : MonoBehaviour
+{
     static TerrainRoot _instance;
     public static TerrainRoot instance
     {
@@ -28,8 +28,9 @@ public class TerrainRoot : MonoBehaviour {
         _instance = this;
     }
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
 
         terrains = GetComponentsInChildren<PixelCollider>();
     }
@@ -39,10 +40,11 @@ public class TerrainRoot : MonoBehaviour {
         terrains = null;
     }
 
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     ///<summary>
     ///Destroy root's child terrains.

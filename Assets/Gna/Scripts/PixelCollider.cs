@@ -2,8 +2,8 @@
 using System.Collections;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class PixelCollider : MonoBehaviour {
-
+public class PixelCollider : TerrainObject
+{
     public class RaycastHit
     {
         public PixelCollider instance { get; private set; }
@@ -19,9 +19,8 @@ public class PixelCollider : MonoBehaviour {
         }
     }
 
-    public Transform cachedTransform { get; private set; }
     protected SpriteRenderer spriteRenderer;
-    
+
     public int width { get; private set; }
     public int height { get; private set; }
     public Bounds bounds { get; private set; }
@@ -30,9 +29,9 @@ public class PixelCollider : MonoBehaviour {
     protected Color[] pixels;
 
     // Use this for initialization
-    protected virtual void Start () {
-
-        cachedTransform = transform;
+    protected override void Start()
+    {
+        base.Start();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
         width = spriteRenderer.sprite.texture.width;
@@ -44,22 +43,47 @@ public class PixelCollider : MonoBehaviour {
         pixels = spriteRenderer.sprite.texture.GetPixels();
     }
 
-    protected virtual void OnDestroy()
+    protected override void OnDestroy()
     {
         pixels = null;
-
         spriteRenderer = null;
-        cachedTransform = null;
-        
+
         Debug.Log("PixelCollider::OnDestroy");
+        base.OnDestroy();
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
 
-	}
+    }
 
-    public bool Raycast( int startX, int startY, int endX, int endY, ref RaycastHit hit)
+    public Vector2 NormalAt(int x, int y)
+    {
+        Vector2 avg = Vector2.zero;
+        for (int w = -3; w <= 3; ++w)
+        {
+            if ((x + w) >= 0f && (x + w) < width)
+            {
+                for (int h = -3; h <= 3; ++h)
+                {
+                    if ((y + h) >= 0f && (y + h) < height)
+                    {
+                        int idx = (x + w) + (y + h) * width;
+                        if (idx < pixels.Length && pixels[idx].a > 0f)
+                        {
+                            avg.x -= w;
+                            avg.y -= h;
+                        }
+                    }
+                }
+            }
+        }
+
+        return avg.normalized;
+    }
+
+    public bool Raycast(int startX, int startY, int endX, int endY, ref RaycastHit hit)
     {
         int deltaX = Mathf.Abs(endX - startX);
         int deltaY = Mathf.Abs(endY - startY);
@@ -115,7 +139,7 @@ public class PixelCollider : MonoBehaviour {
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 int idx = x + y * width;
-                if (pixels[idx].a > 0f)
+                if (idx < pixels.Length && pixels[idx].a > 0f)
                 {
                     float xDiff = x / pixelsPerUnit - startX / pixelsPerUnit;
                     float yDiff = y / pixelsPerUnit - startY / pixelsPerUnit;
@@ -144,6 +168,4 @@ public class PixelCollider : MonoBehaviour {
         hit = null;
         return false; // nothing was found
     }
-
-    public virtual void Destroyed(int xPos, int yPos, float radius, int resolution) { }
 }
