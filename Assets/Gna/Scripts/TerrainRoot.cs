@@ -16,7 +16,7 @@ public class TerrainRoot : MonoBehaviour
         }
     }
 
-    PixelCollider[] terrains;
+    gna.Terrain[] terrains;
 
     void Awake()
     {
@@ -32,7 +32,7 @@ public class TerrainRoot : MonoBehaviour
     void Start()
     {
 
-        terrains = GetComponentsInChildren<PixelCollider>();
+        terrains = GetComponentsInChildren<gna.Terrain>();
     }
 
     void OnDestroy()

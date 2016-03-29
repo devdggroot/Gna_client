@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class PixelCollider : TerrainProperty
+public class PixelCollider : CachedTransform
 {
     public class RaycastHit
     {
@@ -34,13 +34,16 @@ public class PixelCollider : TerrainProperty
         base.Start();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        width = spriteRenderer.sprite.texture.width;
-        height = spriteRenderer.sprite.texture.height;
+        if (spriteRenderer.sprite != null)
+        {
+            width = spriteRenderer.sprite.texture.width;
+            height = spriteRenderer.sprite.texture.height;
 
-        bounds = spriteRenderer.sprite.bounds;
-        pixelsPerUnit = spriteRenderer.sprite.pixelsPerUnit;
+            bounds = spriteRenderer.sprite.bounds;
+            pixelsPerUnit = spriteRenderer.sprite.pixelsPerUnit;
 
-        pixels = spriteRenderer.sprite.texture.GetPixels();
+            pixels = spriteRenderer.sprite.texture.GetPixels();
+        }
     }
 
     protected override void OnDestroy()
