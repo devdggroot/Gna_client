@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DestructibleTerrain : PixelCollider
 {
-    protected Texture2D mask;
+    protected Texture2D mask { get; private set; }
 
     void OnEnable()
     {
@@ -19,16 +19,13 @@ public class DestructibleTerrain : PixelCollider
     protected override void Start()
     {
         base.Start();
-        
-        mask = CreateMask(spriteRenderer.sprite.texture);
-        pixels = mask.GetPixels();
 
-        spriteRenderer.material.SetTexture("_AlphaTex", mask); //instance material
+        AssignAlphaMask();
     }
 
     protected override void OnDestroy()
     {
-        spriteRenderer.material = null; //instance material
+        Destroy(spriteRenderer.material); //instance material
         pixels = null;
 
         if (mask != null)
@@ -46,36 +43,48 @@ public class DestructibleTerrain : PixelCollider
 
     }
 
-    Texture2D CreateMask(Texture2D raw)
+    bool AssignAlphaMask()
     {
-        if (raw != null)
+        if (spriteRenderer != null)
         {
-            Color[] cols = raw.GetPixels();
-
-            Texture2D newTex = new Texture2D(raw.width, raw.height, TextureFormat.Alpha8, false);
-            Color[] newCols = new Color[raw.width * raw.height];
-
-            for (int y = 0, ymax = raw.height; y < ymax; ++y)
+            Texture2D raw = spriteRenderer.sprite.texture;
+            if( raw != null)
             {
-                for (int x = 0, xmax = raw.width; x < xmax; ++x)
+                Color[] cols = raw.GetPixels();
+
+                mask = new Texture2D(raw.width, raw.height, TextureFormat.Alpha8, false);
+                pixels = new Color[raw.width * raw.height];
+
+                for (int y = 0, ymax = raw.height; y < ymax; ++y)
                 {
-                    int idx = x + y * xmax;
-                    if (cols[idx].a > 0f)
-                        newCols[idx] = new Color(0f, 0f, 0f, 1f);
+                    for (int x = 0, xmax = raw.width; x < xmax; ++x)
+                    {
+                        int idx = x + y * xmax;
+                        if (cols[idx].a > 0f)
+                            pixels[idx] = new Color(0f, 0f, 0f, 1f);
 
-                    else
-                        newCols[idx] = Color.clear;
+                        else
+                            pixels[idx] = Color.clear;
+                    }
                 }
+
+                mask.SetPixels(pixels);
+                mask.Apply();
+
+                spriteRenderer.material.SetTexture("_AlphaTex", mask); //instance material
+                return true;
             }
-
-            newTex.SetPixels(newCols);
-            newTex.Apply();
-
-            newCols = null;
-            return newTex;
         }
 
-        return null;
+        return false;
+    }
+
+    public void Reset()
+    {
+        if (mask != null)
+            Destroy(mask);
+
+        AssignAlphaMask();
     }
 
     public override void Destroyed(int xPos, int yPos, float radius, int resolution)
