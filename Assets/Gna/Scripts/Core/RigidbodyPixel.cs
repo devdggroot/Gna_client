@@ -36,7 +36,7 @@ public class RigidbodyPixel : CachedTransform {
     void FixedUpdate()
     {
         Vector3 v = velocity + gravityAcceleration * Time.deltaTime;
-        Vector3 p = cachedTransform.position + v;
+        Vector3 p = cachedTransform.position + v; //position in world
 
         //ray to ground
         if (TerrainRoot.instance.Raycast(cachedTransform.position, p, ref hit, pixelCollider))
