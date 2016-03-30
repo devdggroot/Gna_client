@@ -38,11 +38,8 @@ public class MouseCoord : MonoBehaviour {
 
             Vector3 local = forPixelCoord.cachedTransform.InverseTransformPoint(pos);
 
-            Bounds bounds = forPixelCoord.bounds;
-            float pixelsPerUnit = forPixelCoord.pixelsPerUnit;
-
-            int xPos = (int)((local.x + bounds.extents.x) * pixelsPerUnit);
-            int yPos = (int)((local.y + bounds.extents.y) * pixelsPerUnit);
+            int xPos = (int)(local.x * forPixelCoord.pixelsPerUnit + forPixelCoord.pivot.x);
+            int yPos = (int)(local.y * forPixelCoord.pixelsPerUnit + forPixelCoord.pivot.y);
 
             contents.AppendLine(forPixelCoord.name + "(linked terrain) pixel coord : " + xPos + ", " + yPos);
         }

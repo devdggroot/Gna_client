@@ -59,8 +59,8 @@ public class TerrainRoot : MonoBehaviour
         {
             Vector3 local = terrains[i].cachedTransform.InverseTransformPoint(pos);
 
-            int xPos = (int)((local.x + terrains[i].bounds.extents.x) * terrains[i].pixelsPerUnit);
-            int yPos = (int)((local.y + terrains[i].bounds.extents.y) * terrains[i].pixelsPerUnit);
+            int xPos = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
+            int yPos = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
 
             terrains[i].Destroyed(xPos, yPos, radius * terrains[i].pixelsPerUnit, resolution);
         }
@@ -82,25 +82,25 @@ public class TerrainRoot : MonoBehaviour
     ///</summary>
     ///<param name="start">world coordinate.</param>
     ///<param name="end">world coordinate.</param>
-    public bool Raycast(Vector3 start, Vector3 end, ref PixelCollider.RaycastHit hit)
+    public bool Raycast(Vector3 start, Vector3 end, ref PixelCollider.RaycastHit hit, PixelCollider collider = null)
     {
         hit = null;
         for (int i = 0, imax = terrains.Length; i < imax; ++i)
         {
             Vector3 local = terrains[i].cachedTransform.InverseTransformPoint(start);
 
-            int startX = (int)((local.x + terrains[i].bounds.extents.x) * terrains[i].pixelsPerUnit);
-            int startY = (int)((local.y + terrains[i].bounds.extents.y) * terrains[i].pixelsPerUnit);
+            int startX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
+            int startY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
 
             local = terrains[i].cachedTransform.InverseTransformPoint(end);
 
-            int endX = (int)((local.x + terrains[i].bounds.extents.x) * terrains[i].pixelsPerUnit);
-            int endY = (int)((local.y + terrains[i].bounds.extents.y) * terrains[i].pixelsPerUnit);
+            int endX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
+            int endY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
 
             PixelCollider.RaycastHit temp = null;
-            if (terrains[i].Raycast(startX, startY, endX, endY, ref temp))
+            if (terrains[i].Raycast(startX, startY, endX, endY, ref temp, collider))
             {
-                if (hit == null || temp.distSq < hit.distSq)
+                if (hit == null || temp.sqrDist < hit.sqrDist)
                     hit = temp;
             }
         }

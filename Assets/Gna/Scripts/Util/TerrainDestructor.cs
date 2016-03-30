@@ -61,7 +61,7 @@ public class TerrainDestructor : MonoBehaviour
             PixelCollider.RaycastHit hit = null;
             if (TerrainRoot.instance.Raycast(pos, new Vector3(pos.x, pos.y - 1000f, 0f), ref hit))
             {
-                Debug.Log("hit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.distSq);
+                Debug.Log("hit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.sqrDist);
                 hit = null;
             }
         }
