@@ -48,7 +48,7 @@ public class NormalRenderer : MonoBehaviour {
     {
         List<Vector2> edges = new List<Vector2>();
 
-        if(forNormal != null)
+        /*if(forNormal != null)
         {
             int width = forNormal.width;
             int height = forNormal.height;
@@ -99,7 +99,7 @@ public class NormalRenderer : MonoBehaviour {
                     }
                 }
             }
-        }
+        }*/
 
         return edges;
     }

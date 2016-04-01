@@ -16,7 +16,7 @@ public class TerrainRoot : MonoBehaviour
         }
     }
 
-    gna.Terrain[] terrains;
+    PixelTerrain[] terrains;
 
     void Awake()
     {
@@ -32,7 +32,7 @@ public class TerrainRoot : MonoBehaviour
     void Start()
     {
 
-        terrains = GetComponentsInChildren<gna.Terrain>();
+        terrains = GetComponentsInChildren<PixelTerrain>();
     }
 
     void OnDestroy()
@@ -82,55 +82,13 @@ public class TerrainRoot : MonoBehaviour
     ///</summary>
     ///<param name="start">world coordinate.</param>
     ///<param name="end">world coordinate.</param>
-    public bool Raycast(Vector3 start, Vector3 end, ref PixelCollider.RaycastHit hit)
+    public bool Raycast(gna.Physics.Ray ray, ref gna.Physics.RaycastHit hit)
     {
         hit = null;
         for (int i = 0, imax = terrains.Length; i < imax; ++i)
         {
-            Vector3 local = terrains[i].cachedTransform.InverseTransformPoint(start);
-
-            int startX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
-            int startY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
-
-            local = terrains[i].cachedTransform.InverseTransformPoint(end);
-
-            int endX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
-            int endY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
-
-            PixelCollider.RaycastHit temp = null;
-            if (terrains[i].Raycast(startX, startY, endX, endY, ref temp))
-            {
-                if (hit == null || temp.sqrDist < hit.sqrDist)
-                    hit = temp;
-            }
-        }
-
-        return hit != null ? true : false;
-    }
-
-    ///<summary>
-    ///Raycast root's child terrains and find shortest hit distance object.
-    ///</summary>
-    ///<param name="start">world coordinate.</param>
-    ///<param name="end">world coordinate.</param>
-    ///<param name="collider">volume of ray</param>
-    public bool Raycast(Vector3 start, Vector3 end, ref PixelCollider.RaycastHit hit, PixelCollider collider)
-    {
-        hit = null;
-        for (int i = 0, imax = terrains.Length; i < imax; ++i)
-        {
-            Vector3 local = terrains[i].cachedTransform.InverseTransformPoint(start);
-
-            int startX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
-            int startY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
-
-            local = terrains[i].cachedTransform.InverseTransformPoint(end);
-
-            int endX = (int)(local.x * terrains[i].pixelsPerUnit + terrains[i].pivot.x);
-            int endY = (int)(local.y * terrains[i].pixelsPerUnit + terrains[i].pivot.y);
-
-            PixelCollider.RaycastHit temp = null;
-            if (terrains[i].Raycast(startX, startY, endX, endY, ref temp, collider, (end - start).normalized))
+            gna.Physics.RaycastHit temp = null;
+            if (gna.Physics.Raycast( ray, terrains[i], ref temp))
             {
                 if (hit == null || temp.sqrDist < hit.sqrDist)
                     hit = temp;
