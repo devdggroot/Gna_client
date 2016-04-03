@@ -5,6 +5,8 @@ namespace gna
 {
     public static class Physics
     {
+        public const float gravity = -9.8f;
+        
         public class Ray
         {
             public Vector3 dir { get; private set; }
@@ -48,11 +50,11 @@ namespace gna
             Vector3 start = pixelCollider.cachedTransform.InverseTransformPoint(ray.start);
             Vector3 end = pixelCollider.cachedTransform.InverseTransformPoint(ray.end);
 
-            int startX = (int)(start.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
-            int startY = (int)(start.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
+            int startX = Mathf.RoundToInt(start.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
+            int startY = Mathf.RoundToInt(start.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
 
-            int endX = (int)(end.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
-            int endY = (int)(end.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
+            int endX = Mathf.RoundToInt(end.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
+            int endY = Mathf.RoundToInt(end.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
 
             int deltaX = Mathf.Abs(endX - startX);
             int deltaY = Mathf.Abs(endY - startY);

@@ -3,11 +3,9 @@ using System.Collections;
 
 public class PixelRigidbody : CachedTransform
 {
-    public const float gravity = -9.8f;
-    public const float gravityScale = 0.04f;
-
     //property
-    [HideInInspector] public float COR; //coefficient of restitution
+    [HideInInspector] public float COR = 0f; //coefficient of restitution
+    [HideInInspector] public float GravityScale = 0.02f;
 
     //
     public PixelCollider pixelCollider;
@@ -16,6 +14,7 @@ public class PixelRigidbody : CachedTransform
     public Vector3 velocity { get; protected set; }
 
     public float radius { get; protected set; }
+    public float MinimumVelocity { get; protected set; }
 
     gna.Physics.RaycastHit hit;
 
@@ -24,7 +23,13 @@ public class PixelRigidbody : CachedTransform
     {
         base.Start();
 
-        acceleration = new Vector3(0f, gravity * gravityScale, 0f);
+        acceleration = new Vector3(0f, gna.Physics.gravity * GravityScale, 0f);
+        velocity = Vector3.zero;
+
+        pixelCollider.Setup();
+        radius = Mathf.Min(pixelCollider.width, pixelCollider.height) * 0.5f / pixelCollider.pixelsPerUnit;
+
+        MinimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
     }
 
     protected override void OnDestroy()
@@ -55,23 +60,24 @@ public class PixelRigidbody : CachedTransform
             if(COR > 0f)
             {
                 Vector3 normal = hit.normal;
-                if (normal.sqrMagnitude <= float.Epsilon)
+                if (hit.normal.sqrMagnitude <= float.Epsilon)
                 {
-                    normal = -v.normalized;
-                    Debug.Log(hit.normal);
+                    normal = Vector3.up;
                 }
 
                 Vector3 reflection = v - normal * Vector3.Dot(v, normal) * 2;
-
-                cachedTransform.position = hit.point + (reflection.normalized * radius);
                 velocity = reflection * COR;
-            }
 
+                if (velocity.sqrMagnitude <= (MinimumVelocity * MinimumVelocity))
+                {
+                    velocity = Vector3.zero;
+                }
+            }
             else
             {
-                cachedTransform.position = hit.point + (-v.normalized * radius);
                 velocity = Vector3.zero;
             }
+            cachedTransform.position = hit.point + (-v.normalized * radius);
         }
         else
         {

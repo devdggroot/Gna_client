@@ -18,18 +18,8 @@ public class PixelCollider : CachedTransform
     protected override void Start()
     {
         base.Start();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-
-        if (spriteRenderer.sprite != null)
-        {
-            width = spriteRenderer.sprite.texture.width;
-            height = spriteRenderer.sprite.texture.height;
-
-            pivot = spriteRenderer.sprite.pivot;
-            pixelsPerUnit = spriteRenderer.sprite.pixelsPerUnit;
-
-            pixels = spriteRenderer.sprite.texture.GetPixels();
-        }
+        
+        Setup();
     }
 
     protected override void OnDestroy()
@@ -45,6 +35,25 @@ public class PixelCollider : CachedTransform
     void Update()
     {
 
+    }
+
+    public void Setup()
+    {
+        if(spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+
+            if (spriteRenderer.sprite != null)
+            {
+                width = spriteRenderer.sprite.texture.width;
+                height = spriteRenderer.sprite.texture.height;
+
+                pivot = spriteRenderer.sprite.pivot;
+                pixelsPerUnit = spriteRenderer.sprite.pixelsPerUnit;
+
+                pixels = spriteRenderer.sprite.texture.GetPixels();
+            }
+        }
     }
 
     public Vector2 NormalAt(int x, int y)

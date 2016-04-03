@@ -19,6 +19,11 @@ public class RigidbodyInspector : Editor
         rigidbody.COR = EditorGUILayout.Slider("COR", rigidbody.COR, 0f, 1f);
         EditorGUILayout.EndHorizontal();
 
+        EditorGUILayout.BeginHorizontal();
+        rigidbody.GravityScale = EditorGUILayout.Slider("Gravity Scale", rigidbody.GravityScale, 0f, 1f);
+        EditorGUILayout.EndHorizontal();
+
+
         base.OnInspectorGUI();
     }
 }
