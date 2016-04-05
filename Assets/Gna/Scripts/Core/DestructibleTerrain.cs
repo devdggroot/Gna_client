@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DestructibleTerrain : PixelTerrain
+public class DestructibleTerrain : CollisionalTerrain
 {
     protected Texture2D mask { get; private set; }
 

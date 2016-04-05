@@ -33,15 +33,17 @@ namespace gna
             public Vector3 normal { get; private set; }
 
             public float sqrDist { get; private set; }
+            public float distance { get; private set; }
 
-            public RaycastHit( Ray ray, PixelCollider pixelCollider, Vector3 point, Vector3 normal, float sqrDist)
+            public RaycastHit( Ray ray, PixelCollider pixelCollider, Vector3 point, Vector3 normal)
             {
                 this.ray = ray;
                 this.pixelCollider = pixelCollider;
 
                 this.point = point;
                 this.normal = normal;
-                this.sqrDist = sqrDist;
+
+                this.distance = Vector3.Distance(ray.start, point);
             }
         }
 
@@ -117,13 +119,11 @@ namespace gna
                         point.y = (y - pixelCollider.pivot.y) / pixelCollider.pixelsPerUnit;
                         point = pixelCollider.cachedTransform.TransformPoint(point);
 
-                        Vector2 normal = pixelCollider.NormalAt(x, y);
+                        //float xDiff = (x - startX) / pixelCollider.pixelsPerUnit;
+                        //float yDiff = (y - startY) / pixelCollider.pixelsPerUnit;
+                        //float sqrDist = (xDiff * xDiff + yDiff * yDiff);
 
-                        float xDiff = (x - startX) / pixelCollider.pixelsPerUnit;
-                        float yDiff = (y - startY) / pixelCollider.pixelsPerUnit;
-                        float sqrDist = (xDiff * xDiff + yDiff * yDiff);
-
-                        hit = new RaycastHit( ray, pixelCollider, point, normal, sqrDist);
+                        hit = new RaycastHit( ray, pixelCollider, point, pixelCollider.NormalAt(x, y));
                         return true;
                     }
                 }

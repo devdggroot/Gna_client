@@ -5,7 +5,8 @@ public class PixelRigidbody : CachedTransform
 {
     //property
     [HideInInspector] public float COR = 0f; //coefficient of restitution
-    [HideInInspector] public float GravityScale = 0.02f;
+    [HideInInspector] public float GravityScale = 2;
+    [HideInInspector] public float LimitClimbAngle = 90;
 
     //
     public PixelCollider pixelCollider;
@@ -14,7 +15,7 @@ public class PixelRigidbody : CachedTransform
     public Vector3 velocity { get; protected set; }
 
     public float radius { get; protected set; }
-    public float MinimumVelocity { get; protected set; }
+    public float minimumVelocity { get; protected set; }
 
     gna.Physics.RaycastHit hit;
 
@@ -23,13 +24,19 @@ public class PixelRigidbody : CachedTransform
     {
         base.Start();
 
-        acceleration = new Vector3(0f, gna.Physics.gravity * GravityScale, 0f);
+        acceleration = Vector3.zero;
         velocity = Vector3.zero;
+        minimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
 
-        pixelCollider.Setup();
-        radius = Mathf.Min(pixelCollider.width, pixelCollider.height) * 0.5f / pixelCollider.pixelsPerUnit;
-
-        MinimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
+        if(pixelCollider != null)
+        {
+            pixelCollider.Setup();
+            radius = Mathf.Min(pixelCollider.width, pixelCollider.height) * 0.5f / pixelCollider.pixelsPerUnit;
+        }
+        else
+        {
+            print("pixelCollider is null(" + gameObject.name + ").");
+        }
     }
 
     protected override void OnDestroy()
@@ -43,19 +50,28 @@ public class PixelRigidbody : CachedTransform
 
     }
 
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
-        Vector3 v = velocity + acceleration * Time.deltaTime;
+        Vector3 a = acceleration;
+        a.y += (gna.Physics.gravity * GravityScale); //apply gravity
 
-        Vector3 end = cachedTransform.position + v; //position in world
-        if (pixelCollider != null)
-        {
-            radius = Mathf.Min(pixelCollider.width, pixelCollider.height) * 0.5f / pixelCollider.pixelsPerUnit;
-            end += (v.normalized * radius);
-        }
+        Vector3 deltaVelocity = a * Time.deltaTime;
+        velocity = velocity + deltaVelocity;
 
-        //ray to ground
-        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(cachedTransform.position, end), ref hit))
+        Vector3 deltaMovement = velocity * Time.deltaTime;
+
+        Vector3 rayStart = Vector3.zero;
+        Vector3 rayEnd = Vector3.zero;
+
+        //raycast y-axis
+        //Vector3 end = cachedTransform.position + deltaMovement;
+        //end += (deltaMovement.normalized * radius); //
+
+        rayStart = cachedTransform.position;
+        rayEnd = cachedTransform.position + deltaMovement + (deltaMovement.normalized * radius);
+
+        Debug.DrawRay(rayStart, rayEnd - rayStart, Color.red);
+        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
         {
             if(COR > 0f)
             {
@@ -65,10 +81,10 @@ public class PixelRigidbody : CachedTransform
                     normal = Vector3.up;
                 }
 
-                Vector3 reflection = v - normal * Vector3.Dot(v, normal) * 2;
+                Vector3 reflection = velocity - normal * Vector3.Dot(velocity, normal) * 2f;
                 velocity = reflection * COR;
 
-                if (velocity.sqrMagnitude <= (MinimumVelocity * MinimumVelocity))
+                if (velocity.sqrMagnitude <= (minimumVelocity * minimumVelocity))
                 {
                     velocity = Vector3.zero;
                 }
@@ -77,14 +93,19 @@ public class PixelRigidbody : CachedTransform
             {
                 velocity = Vector3.zero;
             }
-            cachedTransform.position = hit.point + (-v.normalized * radius);
+
+            //
+            deltaMovement = deltaMovement.normalized * (hit.distance - radius);
+            cachedTransform.position = cachedTransform.position + deltaMovement;
         }
         else
         {
-            cachedTransform.position = cachedTransform.position + v;
-            velocity = v;
+            cachedTransform.position = cachedTransform.position + deltaMovement;
         }
 
+
+
+        //print("PixelRigidbody::FixedUpdate");
         //Time.deltaTime == Time.fixedDeltaTime
         //Time.fixedTime : total fiexdTime
     }
