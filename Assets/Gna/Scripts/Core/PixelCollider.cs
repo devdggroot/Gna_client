@@ -59,25 +59,56 @@ public class PixelCollider : CachedTransform
     public Vector2 NormalAt(int x, int y)
     {
         Vector2 avg = Vector2.zero;
+
         for (int w = -3; w <= 3; ++w)
         {
-            if ((x + w) >= 0f && (x + w) < width)
+            for (int h = -3; h <= 3; ++h)
             {
-                for (int h = -3; h <= 3; ++h)
+                //width, height 예외처리.
+
+                int idx = (x + w) + (y + h) * width;
+                if (idx < pixels.Length && pixels[idx].a > 0f)
                 {
-                    if ((y + h) >= 0f && (y + h) < height)
+                    avg.x -= w;
+                    avg.y -= h;
+                }
+
+
+                //
+                /*for ( int i = 0; i < resolution; ++i)
+                {
+                    int _x = x + resolution * w + i;
+                    if (_x < 0 || _x >= width) continue;
+
+                    for ( int j = 0; j < resolution; ++j)
                     {
-                        int idx = (x + w) + (y + h) * width;
+                        int _y = y + resolution * h + j;
+                        if (_y < 0 || _y >= height) continue;
+
+                        int idx = (_x + w) + (_y + h) * width;
                         if (idx < pixels.Length && pixels[idx].a > 0f)
                         {
                             avg.x -= w;
                             avg.y -= h;
+
+                            //
+                            i = resolution;
+                            j = resolution;
+                            //break;
                         }
                     }
-                }
+                }*/
+                //
+                
             }
         }
 
-        return avg.normalized;
+        avg = avg.normalized;
+        if (Mathf.Abs(avg.x) <= float.Epsilon && Mathf.Abs(avg.y) <= float.Epsilon)
+        {
+            avg = Vector3.up;
+        }
+
+        return avg;
     }
 }

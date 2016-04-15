@@ -5,19 +5,26 @@ public class PixelRigidbody : CachedTransform
 {
     //property
     [HideInInspector] public float COR = 0f; //coefficient of restitution
-    [HideInInspector] public float GravityScale = 2;
+    [HideInInspector] public float GravityScale = 1;
     [HideInInspector] public float LimitClimbAngle = 90;
 
     //
     public PixelCollider pixelCollider;
 
-    public Vector3 acceleration { get; protected set; }
-    public Vector3 velocity { get; protected set; }
+    [HideInInspector] public Vector3 acceleration;// { get; protected set; }
+    [HideInInspector] public Vector3 velocity;// { get; protected set; }
 
     public float radius { get; protected set; }
     public float minimumVelocity { get; protected set; }
 
-    gna.Physics.RaycastHit hit;
+    public enum State
+    {
+        Ground,
+        Airborne,
+    }
+    public State state { get; protected set; }
+
+    protected gna.Physics.RaycastHit hit;
 
     // Use this for initialization
     protected override void Start()
@@ -26,6 +33,7 @@ public class PixelRigidbody : CachedTransform
 
         acceleration = Vector3.zero;
         velocity = Vector3.zero;
+
         minimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
 
         if(pixelCollider != null)
@@ -56,42 +64,37 @@ public class PixelRigidbody : CachedTransform
         a.y += (gna.Physics.gravity * GravityScale); //apply gravity
 
         Vector3 deltaVelocity = a * Time.deltaTime;
-        velocity = velocity + deltaVelocity;
+        velocity += deltaVelocity;
 
         Vector3 deltaMovement = velocity * Time.deltaTime;
 
-        Vector3 rayStart = Vector3.zero;
-        Vector3 rayEnd = Vector3.zero;
-
-        //raycast y-axis
-        //Vector3 end = cachedTransform.position + deltaMovement;
-        //end += (deltaMovement.normalized * radius); //
-
-        rayStart = cachedTransform.position;
-        rayEnd = cachedTransform.position + deltaMovement + (deltaMovement.normalized * radius);
+        Vector3 rayStart = cachedTransform.position;
+        Vector3 rayEnd = cachedTransform.position + (deltaMovement.normalized * radius) + deltaMovement;
 
         Debug.DrawRay(rayStart, rayEnd - rayStart, Color.red);
         if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
         {
-            if(COR > 0f)
+            Vector3 normal = hit.normal;
+            if (hit.normal.sqrMagnitude <= float.Epsilon)
             {
-                Vector3 normal = hit.normal;
-                if (hit.normal.sqrMagnitude <= float.Epsilon)
-                {
-                    normal = Vector3.up;
-                }
+                normal = Vector3.up;
+            }
 
+            if (COR > 0f)
+            {
                 Vector3 reflection = velocity - normal * Vector3.Dot(velocity, normal) * 2f;
                 velocity = reflection * COR;
 
                 if (velocity.sqrMagnitude <= (minimumVelocity * minimumVelocity))
                 {
                     velocity = Vector3.zero;
+                    state = State.Ground;
                 }
             }
             else
             {
                 velocity = Vector3.zero;
+                state = State.Ground;
             }
 
             //
@@ -100,10 +103,9 @@ public class PixelRigidbody : CachedTransform
         }
         else
         {
+            state = State.Airborne;
             cachedTransform.position = cachedTransform.position + deltaMovement;
         }
-
-
 
         //print("PixelRigidbody::FixedUpdate");
         //Time.deltaTime == Time.fixedDeltaTime

@@ -56,14 +56,14 @@ public class TerrainDestructor : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButton/*Down*/(1))
         {
-            /*PixelCollider.RaycastHit hit = null;
-            if (TerrainRoot.instance.Raycast(pos, new Vector3(pos.x, pos.y - 1000f, 0f), ref hit))
+            gna.Physics.RaycastHit hit = null;
+            if (TerrainRoot.instance.Raycast( new gna.Physics.Ray(pos, new Vector3(pos.x, pos.y - 1000f, 0f)), ref hit))
             {
-                Debug.Log("RaycastHit object(" + hit.instance.name + ") position " + hit.coord.x + ", " + hit.coord.y + ", distSq : " + hit.sqrDist);
-                hit = null;
-            }*/
+                Vector3 end = hit.point + hit.normal * 2f;
+                Debug.DrawRay(hit.point, end - hit.point, Color.red);
+            }
         }
     }
 }
