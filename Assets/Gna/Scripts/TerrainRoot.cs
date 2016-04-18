@@ -16,7 +16,7 @@ public class TerrainRoot : MonoBehaviour
         }
     }
 
-    CollisionalTerrain[] terrains;
+    CollisionTerrain[] terrains;
 
     void Awake()
     {
@@ -32,7 +32,7 @@ public class TerrainRoot : MonoBehaviour
     void Start()
     {
 
-        terrains = GetComponentsInChildren<CollisionalTerrain>();
+        terrains = GetComponentsInChildren<CollisionTerrain>();
     }
 
     void OnDestroy()

@@ -1,21 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PixelRigidbody : CachedTransform
+public class Body : CachedTransform
 {
     //property
     [HideInInspector] public float COR = 0f; //coefficient of restitution
     [HideInInspector] public float GravityScale = 1;
-    [HideInInspector] public float LimitClimbAngle = 90;
-
-    //
-    public PixelCollider pixelCollider;
 
     [HideInInspector] public Vector3 acceleration;// { get; protected set; }
     [HideInInspector] public Vector3 velocity;// { get; protected set; }
 
-    public float radius { get; protected set; }
-    public float minimumVelocity { get; protected set; }
+    public float radius = 1f;// { get; protected set; }
+    [HideInInspector] public float minimumVelocity;// { get; protected set; }
 
     public enum State
     {
@@ -35,16 +31,6 @@ public class PixelRigidbody : CachedTransform
         velocity = Vector3.zero;
 
         minimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
-
-        if(pixelCollider != null)
-        {
-            pixelCollider.Setup();
-            radius = Mathf.Min(pixelCollider.width, pixelCollider.height) * 0.5f / pixelCollider.pixelsPerUnit;
-        }
-        else
-        {
-            print("pixelCollider is null(" + gameObject.name + ").");
-        }
     }
 
     protected override void OnDestroy()
@@ -60,10 +46,9 @@ public class PixelRigidbody : CachedTransform
 
     protected virtual void FixedUpdate()
     {
-        Vector3 a = acceleration;
-        a.y += (gna.Physics.gravity * GravityScale); //apply gravity
+        acceleration.y = (gna.Physics.gravity * GravityScale); //apply gravity
 
-        Vector3 deltaVelocity = a * Time.deltaTime;
+        Vector3 deltaVelocity = acceleration * Time.deltaTime;
         velocity += deltaVelocity;
 
         Vector3 deltaMovement = velocity * Time.deltaTime;
@@ -107,7 +92,7 @@ public class PixelRigidbody : CachedTransform
             cachedTransform.position = cachedTransform.position + deltaMovement;
         }
 
-        //print("PixelRigidbody::FixedUpdate");
+        //print("Body::FixedUpdate");
         //Time.deltaTime == Time.fixedDeltaTime
         //Time.fixedTime : total fiexdTime
     }

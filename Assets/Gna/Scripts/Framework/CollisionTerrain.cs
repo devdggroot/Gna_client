@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CollisionalTerrain : PixelCollider
+public class CollisionTerrain : PixelCollider
 {
     // Use this for initialization
     /*void Start () {
