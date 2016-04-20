@@ -3,20 +3,18 @@ using System.Collections;
 
 public class Character : Body
 {
-    public float skin = 0.1f;
-    public float moveSpeed = 2f;
+    public float moveSpeed = 1f;
     public float limitClimbAngle = 90f;
 
-    public enum View
+    public enum LookAt
     {
         Right,
         Left,
     }
-    public View view { get; protected set; }
 
     // Use this for initialization
-    protected override void Start () {
-
+    protected override void Start()
+    {
         base.Start();
     }
 
@@ -36,33 +34,46 @@ public class Character : Body
         return false;
     }
 
-    View UpdateMovement(Vector3 deltaMovement, ref Vector3 movement)
+    Vector3 UpdateLookAt(Vector3 up)
     {
-        Vector3 direction = cachedTransform.right * Mathf.Sign(deltaMovement.x);
+        cachedTransform.rotation = Quaternion.LookRotation(cachedTransform.forward, up);
+        return cachedTransform.right;
+    }
 
-        float slopeAngle = Vector3.Angle(cachedTransform.up, Vector3.up);
-        if (slopeAngle > limitClimbAngle && direction.y >= 0f/*climb*/)
+    Vector3 UpdateLookAt(LookAt lookAt)
+    {
+        cachedTransform.rotation = Quaternion.LookRotation(lookAt == LookAt.Right ? Vector3.forward : Vector3.back, cachedTransform.up);
+        return cachedTransform.right;
+    }
+
+    Body.State UpdateMovement(Vector3 deltaMovement, ref Vector3 movement)
+    {
+        Vector3 direction = cachedTransform.right;
+
+        if (Mathf.Abs(deltaMovement.x) > 0f && state == State.Ground)
         {
-            deltaMovement.x = 0f;
-        }
+            direction = UpdateLookAt(Mathf.Sign(deltaMovement.x) > 0f ? LookAt.Right : LookAt.Left);
 
-        if (slopeAngle >= 90f && direction.y < 0f/*descend*/)
-        {
-            cachedTransform.up = Vector3.up;
-            direction = cachedTransform.right * Mathf.Sign(deltaMovement.x);
-        }
-
-        movement = direction * Mathf.Abs(deltaMovement.x);
-
-        Vector3 rayStart = cachedTransform.position /*+ direction * radius * 0.5f*/;
-        Vector3 rayEnd = rayStart + (direction * skin) + movement;
-
-        Debug.DrawRay(rayStart, rayEnd - rayStart, Color.blue);
-        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
-        {
-            if (hit.distance > skin)
+            float slopeAngle = Vector3.Angle(cachedTransform.up, Vector3.up);
+            if (slopeAngle <= limitClimbAngle || direction.y < 0f/*descend*/)
             {
-                movement = direction * (hit.distance - skin);
+                movement = direction * Mathf.Abs(deltaMovement.x);
+
+                Vector3 rayStart = cachedTransform.position;
+                Vector3 rayEnd = rayStart + direction * radius + movement;
+
+                Debug.DrawRay(rayStart, rayEnd - rayStart, Color.red);
+                if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                {
+                    if (hit.distance > radius)
+                    {
+                        movement = direction * (hit.distance - radius);
+                    }
+                    else
+                    {
+                        movement = Vector3.zero;
+                    }
+                }
             }
             else
             {
@@ -70,54 +81,43 @@ public class Character : Body
             }
         }
 
-        return Mathf.Sign(deltaMovement.x) > 0f ? View.Right : View.Left;
-    }
-
-    Body.State UpdateBodyState(Vector3 deltaMovement, ref Vector3 movement)
-    {
-        Vector3 direction = cachedTransform.up * Mathf.Sign(deltaMovement.y);
-
-        Vector3 rayStart = cachedTransform.position + movement + direction * radius;
-        Vector3 rayEnd = rayStart + (skin + Mathf.Abs(deltaMovement.y)) * direction;
-
-        //
-        if (Mathf.Abs(movement.x) > 0f)
+        if (Mathf.Abs(deltaMovement.y) > 0f)
         {
-            rayEnd += (skin/*minimum instant movement*/ * direction);
-        }
+            Vector3 down = cachedTransform.up * -1f;
 
-        Debug.DrawRay(rayStart, rayEnd - rayStart, Color.blue);
-        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
-        {
-            movement += direction * (radius + hit.distance);
-            movement += hit.normal * (radius + skin);
+            Vector3 rayStart = cachedTransform.position + movement;
+            Vector3 rayEnd = rayStart + down * (radius + Mathf.Abs(movement.sqrMagnitude > 0f ? deltaMovement.x : deltaMovement.y));
 
-            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-            if (slopeAngle >= 90f)
+            Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
+            if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
             {
-                cachedTransform.up = Vector3.up;
-                return Body.State.Airborne;
-            }
-            else
-            {
-                cachedTransform.up = hit.normal;
-                return Body.State.Ground;
-            }
-        }
+                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                if (slopeAngle < 90f)
+                {
+                    movement += down * hit.distance;
+                    movement += hit.normal * radius;
 
-        else
-        {
-            if( movement.y >= 0f/*climb*/)
-            {
-                movement += direction * (radius + skin);
-                movement += Vector3.up * (radius + skin);
+                    UpdateLookAt(hit.normal);
+                    return Body.State.Ground;
+                }
             }
 
-            cachedTransform.up = Vector3.up;
-            movement += cachedTransform.up * Mathf.Sign(deltaMovement.y) * Mathf.Abs(deltaMovement.y);
+            movement = down * radius;
+            movement += Vector3.up * radius;
+
+            direction = UpdateLookAt(Vector3.up);
+            down = cachedTransform.up * -1f;
+
+            if (movement.sqrMagnitude > 0f)
+            {
+                movement += direction * Mathf.Abs(deltaMovement.x);
+            }
+            movement += down * Mathf.Abs(deltaMovement.y);
 
             return Body.State.Airborne;
         }
+
+        return state;
     }
 
     protected override void FixedUpdate()
@@ -128,23 +128,15 @@ public class Character : Body
         velocity += deltaVelocity;
 
         Vector3 deltaMovement = velocity * Time.deltaTime;
-
         Vector3 movement = Vector3.zero;
-        if (Mathf.Abs(deltaMovement.x) > 0f && state == State.Ground)
-        {
-            view = UpdateMovement(deltaMovement, ref movement);
-        }
 
-        if (Mathf.Abs(deltaMovement.y) > 0f)
-        {
-            state = UpdateBodyState(deltaMovement, ref movement);
-        }
-            
-        if( state == Body.State.Ground)
-        {
-            velocity.y = 0f;
-        }
-        velocity.x = 0f;
+        state = UpdateMovement(deltaMovement, ref movement);
         cachedTransform.position = cachedTransform.position + movement;
+
+        velocity.x = 0f;
+        if (state == Body.State.Ground)
+        {
+            velocity = Vector3.zero;
+        }
     }
 }
