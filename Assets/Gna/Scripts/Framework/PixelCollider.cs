@@ -59,12 +59,13 @@ public class PixelCollider : CachedTransform
     public Vector2 NormalAt(int x, int y)
     {
         Vector2 avg = Vector2.zero;
-
+        //int resolution = 3;
         for (int w = -3; w <= 3; ++w)
         {
+            if (w < 0 || w >= width) continue;
             for (int h = -3; h <= 3; ++h)
             {
-                //width, height 예외처리.
+                if (h < 0 || h >= height) continue;
 
                 int idx = (x + w) + (y + h) * width;
                 if (idx < pixels.Length && pixels[idx].a > 0f)

@@ -6,6 +6,10 @@ public class Character : Body
     public float moveSpeed = 1f;
     public float limitClimbAngle = 90f;
 
+    public float minimumFireAngle = -10f;
+    public float maximumFireAngle = 40f;
+    public float currentFireAngle = 0f;
+
     public enum LookAt
     {
         Right,
@@ -23,15 +27,20 @@ public class Character : Body
 	
 	}*/
 
-    public bool Move(Vector3 input)
+    public void Aim(Vector3 input)
+    {
+        if (Mathf.Abs(input.y) > 0f)
+        {
+            currentFireAngle = Mathf.Clamp(currentFireAngle + input.y, minimumFireAngle, maximumFireAngle);
+        }
+    }
+
+    public void Move(Vector3 input)
     {
         if (Mathf.Abs(input.x) > 0f)
         {
             velocity.x = input.x * moveSpeed;
-            return true;
         }
-
-        return false;
     }
 
     Vector3 UpdateLookAt(Vector3 up)
@@ -92,7 +101,7 @@ public class Character : Body
             if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
             {
                 float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-                if (slopeAngle < 90f)
+                if (slopeAngle < 88f)
                 {
                     movement += down * hit.distance;
                     movement += hit.normal * radius;

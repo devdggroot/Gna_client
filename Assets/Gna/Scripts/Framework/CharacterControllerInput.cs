@@ -2,23 +2,29 @@
 using System.Collections;
 
 [RequireComponent(typeof(Character))]
-public class CharacterControllerInput : MonoBehaviour {
+public class CharacterControllerInput : MonoBehaviour
+{
+    Character character;
 
-    Character charater;
-
-	// Use this for initialization
-	void Start () {
-
-        charater = GetComponent<Character>();
+    void OnDestroy()
+    {
+        character = null;
     }
-	
-	// Update is called once per frame
-	void Update () {
 
-        if(charater != null)
+    // Use this for initialization
+    void Start()
+    {
+        character = GetComponent<Character>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (character != null)
         {
             Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            charater.Move(input);
+            character.Move(input);
+            character.Aim(input);
         }
     }
 }
