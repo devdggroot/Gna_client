@@ -4,14 +4,17 @@ using System.Collections;
 public class Body : CachedTransform
 {
     //property
-    [HideInInspector] public float COR = 0f; //coefficient of restitution
-    [HideInInspector] public float GravityScale = 1;
+    [HideInInspector]
+    public float COR = 0f; //coefficient of restitution
+    [HideInInspector]
+    public float GravityScale = 1;
 
-    [HideInInspector] public Vector3 acceleration;// { get; protected set; }
-    [HideInInspector] public Vector3 velocity;// { get; protected set; }
+    [HideInInspector]
+    public Vector3 acceleration;
+    [HideInInspector]
+    public Vector3 velocity;
 
-    public float radius = 1f;// { get; protected set; }
-    [HideInInspector] public float minimumVelocity;// { get; protected set; }
+    public float radius = 1f;
 
     public enum State
     {
@@ -29,8 +32,6 @@ public class Body : CachedTransform
 
         acceleration = Vector3.zero;
         velocity = Vector3.zero;
-
-        minimumVelocity = gna.Physics.gravity * GravityScale * Time.fixedDeltaTime;
     }
 
     protected override void OnDestroy()
@@ -70,7 +71,7 @@ public class Body : CachedTransform
                 Vector3 reflection = velocity - normal * Vector3.Dot(velocity, normal) * 2f;
                 velocity = reflection * COR;
 
-                if (velocity.sqrMagnitude <= (minimumVelocity * minimumVelocity))
+                if (velocity.sqrMagnitude <= gna.Physics.velocityEpsilon)
                 {
                     velocity = Vector3.zero;
                     state = State.Ground;

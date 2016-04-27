@@ -62,10 +62,10 @@ public class PixelCollider : CachedTransform
         //int resolution = 3;
         for (int w = -3; w <= 3; ++w)
         {
-            if (w < 0 || w >= width) continue;
+            if ((x + w) < 0 || (x + w) >= width) continue;
             for (int h = -3; h <= 3; ++h)
             {
-                if (h < 0 || h >= height) continue;
+                if ((y + h) < 0 || (y + h) >= height) continue;
 
                 int idx = (x + w) + (y + h) * width;
                 if (idx < pixels.Length && pixels[idx].a > 0f)
@@ -104,12 +104,6 @@ public class PixelCollider : CachedTransform
             }
         }
 
-        avg = avg.normalized;
-        if (Mathf.Abs(avg.x) <= float.Epsilon && Mathf.Abs(avg.y) <= float.Epsilon)
-        {
-            avg = Vector3.up;
-        }
-
-        return avg;
+        return avg.normalized;
     }
 }

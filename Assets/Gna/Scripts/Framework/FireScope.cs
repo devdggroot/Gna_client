@@ -44,13 +44,13 @@ public class FireScope : MonoBehaviour
     {
         if (character != null && character.cachedTransform != null)
         {
-            Vector3 lookAt = character.cachedTransform.right;
+            Vector3 lookAt = Quaternion.LookRotation(character.cachedTransform.forward, character.up) * Vector3.right;//character.cachedTransform.right;
 
             {
                 min.SetVertexCount(2);
                 min.SetPosition(0, character.cachedTransform.position + Vector3.back);
 
-                Vector3 direction = Quaternion.AngleAxis(character.minimumFireAngle, character.cachedTransform.forward) * lookAt;
+                Vector3 direction = Quaternion.AngleAxis(character.minScopeAngle, character.cachedTransform.forward) * lookAt;
                 min.SetPosition(1, character.cachedTransform.position + direction + Vector3.back);
             }
 
@@ -58,7 +58,7 @@ public class FireScope : MonoBehaviour
                 max.SetVertexCount(2);
                 max.SetPosition(0, character.cachedTransform.position + Vector3.back);
 
-                Vector3 direction = Quaternion.AngleAxis(character.maximumFireAngle, character.cachedTransform.forward) * lookAt;
+                Vector3 direction = Quaternion.AngleAxis(character.maxScopeAngle, character.cachedTransform.forward) * lookAt;
                 max.SetPosition(1, character.cachedTransform.position + direction + Vector3.back);
             }
 
@@ -66,7 +66,7 @@ public class FireScope : MonoBehaviour
                 current.SetVertexCount(2);
                 current.SetPosition(0, character.cachedTransform.position + Vector3.back);
 
-                Vector3 direction = Quaternion.AngleAxis(character.currentFireAngle, character.cachedTransform.forward) * lookAt;
+                Vector3 direction = Quaternion.AngleAxis(character.angle, character.cachedTransform.forward) * lookAt;
                 current.SetPosition(1, character.cachedTransform.position + direction * 2f + Vector3.back);
             }
         }

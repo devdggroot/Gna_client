@@ -3,12 +3,20 @@ using System.Collections;
 
 public class Character : Body
 {
+    //property
     public float moveSpeed = 1f;
     public float limitClimbAngle = 90f;
 
-    public float minimumFireAngle = -10f;
-    public float maximumFireAngle = 40f;
-    public float currentFireAngle = 0f;
+    public float minScopeAngle = -10f;
+    public float maxScopeAngle = 40f;
+
+    [HideInInspector]
+    public Vector3 up;
+
+    [HideInInspector]
+    public float movement;
+    [HideInInspector]
+    public float angle = 0f;
 
     public enum LookAt
     {
@@ -31,7 +39,7 @@ public class Character : Body
     {
         if (Mathf.Abs(input.y) > 0f)
         {
-            currentFireAngle = Mathf.Clamp(currentFireAngle + input.y, minimumFireAngle, maximumFireAngle);
+            angle = Mathf.Clamp(angle + input.y, minScopeAngle, maxScopeAngle);
         }
     }
 
@@ -39,7 +47,7 @@ public class Character : Body
     {
         if (Mathf.Abs(input.x) > 0f)
         {
-            velocity.x = input.x * moveSpeed;
+            movement = input.x * moveSpeed;
         }
     }
 
@@ -55,97 +63,63 @@ public class Character : Body
         return cachedTransform.right;
     }
 
-    Body.State UpdateMovement(Vector3 deltaMovement, ref Vector3 movement)
-    {
-        Vector3 direction = cachedTransform.right;
-
-        if (Mathf.Abs(deltaMovement.x) > 0f && state == State.Ground)
-        {
-            direction = UpdateLookAt(Mathf.Sign(deltaMovement.x) > 0f ? LookAt.Right : LookAt.Left);
-
-            float slopeAngle = Vector3.Angle(cachedTransform.up, Vector3.up);
-            if (slopeAngle <= limitClimbAngle || direction.y < 0f/*descend*/)
-            {
-                movement = direction * Mathf.Abs(deltaMovement.x);
-
-                Vector3 rayStart = cachedTransform.position;
-                Vector3 rayEnd = rayStart + direction * radius + movement;
-
-                Debug.DrawRay(rayStart, rayEnd - rayStart, Color.red);
-                if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
-                {
-                    if (hit.distance > radius)
-                    {
-                        movement = direction * (hit.distance - radius);
-                    }
-                    else
-                    {
-                        movement = Vector3.zero;
-                    }
-                }
-            }
-            else
-            {
-                movement = Vector3.zero;
-            }
-        }
-
-        if (Mathf.Abs(deltaMovement.y) > 0f)
-        {
-            Vector3 down = cachedTransform.up * -1f;
-
-            Vector3 rayStart = cachedTransform.position + movement;
-            Vector3 rayEnd = rayStart + down * (radius + Mathf.Abs(movement.sqrMagnitude > 0f ? deltaMovement.x : deltaMovement.y));
-
-            Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
-            if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
-            {
-                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-                if (slopeAngle < 88f)
-                {
-                    movement += down * hit.distance;
-                    movement += hit.normal * radius;
-
-                    UpdateLookAt(hit.normal);
-                    return Body.State.Ground;
-                }
-            }
-
-            movement = down * radius;
-            movement += Vector3.up * radius;
-
-            direction = UpdateLookAt(Vector3.up);
-            down = cachedTransform.up * -1f;
-
-            if (movement.sqrMagnitude > 0f)
-            {
-                movement += direction * Mathf.Abs(deltaMovement.x);
-            }
-            movement += down * Mathf.Abs(deltaMovement.y);
-
-            return Body.State.Airborne;
-        }
-
-        return state;
-    }
-
     protected override void FixedUpdate()
     {
-        acceleration.y = (gna.Physics.gravity * GravityScale); //apply gravity
+        base.FixedUpdate();
 
-        Vector3 deltaVelocity = acceleration * Time.deltaTime;
-        velocity += deltaVelocity;
-
-        Vector3 deltaMovement = velocity * Time.deltaTime;
-        Vector3 movement = Vector3.zero;
-
-        state = UpdateMovement(deltaMovement, ref movement);
-        cachedTransform.position = cachedTransform.position + movement;
-
-        velocity.x = 0f;
-        if (state == Body.State.Ground)
+        if (state == State.Ground)
         {
-            velocity = Vector3.zero;
+            up = hit.normal;
+
+            if (Mathf.Abs(movement) > 0f)
+            {
+                Vector3 direction = UpdateLookAt(Mathf.Sign(movement) > 0f ? LookAt.Right : LookAt.Left);
+
+                float slopeAngle = Vector3.Angle(up, Vector3.up);
+                if (slopeAngle <= limitClimbAngle || Vector3.Angle(direction, up) <= 90f/*descend*/)
+                {
+                    Vector3 deltaMovement = direction * Mathf.Abs(movement) * Time.deltaTime;
+                    deltaMovement.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * deltaMovement.x;
+
+                    Vector3 rayStart = cachedTransform.position;
+                    Vector3 rayEnd = cachedTransform.position + deltaMovement;
+
+                    Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
+                    if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                    {
+                        if (hit.distance > radius)
+                        {
+                            deltaMovement = direction * (hit.distance - radius);
+                        }
+                        else
+                        {
+                            deltaMovement = Vector3.zero;
+                        }
+                    }
+
+                    rayStart = cachedTransform.position + deltaMovement;
+                    rayEnd = rayStart + Vector3.down * (radius + radius);
+
+                    Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
+                    if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                    {
+                        deltaMovement += Vector3.down * (hit.distance - radius);
+                    }
+
+                    cachedTransform.position = cachedTransform.position + deltaMovement;
+                }
+            }
         }
+        else if(state == State.Airborne)
+        {
+            up = Vector3.up;
+
+            if (Mathf.Abs(movement) > 0f)
+            {
+                UpdateLookAt(Mathf.Sign(movement) > 0f ? LookAt.Right : LookAt.Left);
+            }
+        }
+
+        movement = 0f;
     }
 }

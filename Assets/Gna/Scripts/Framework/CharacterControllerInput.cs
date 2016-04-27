@@ -18,7 +18,17 @@ public class CharacterControllerInput : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    /*void Update()
+    {
+        if (character != null)
+        {
+            Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            character.Move(input);
+            character.Aim(input);
+        }
+    }*/
+
+    void FixedUpdate()
     {
         if (character != null)
         {

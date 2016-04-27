@@ -6,7 +6,9 @@ namespace gna
     public static class Physics
     {
         public const float gravity = -9.8f;
-        
+        public const float velocityEpsilon = 0.00001f;
+
+
         public class Ray
         {
             public Vector3 dir { get; private set; }
