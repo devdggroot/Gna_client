@@ -34,7 +34,6 @@ namespace gna
             public Vector3 point { get; private set; }
             public Vector3 normal { get; private set; }
 
-            public float sqrDist { get; private set; }
             public float distance { get; private set; }
 
             public RaycastHit( Ray ray, PixelCollider pixelCollider, Vector3 point, Vector3 normal)

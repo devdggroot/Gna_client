@@ -48,26 +48,26 @@ public class FireScope : MonoBehaviour
 
             {
                 min.SetVertexCount(2);
-                min.SetPosition(0, character.cachedTransform.position + Vector3.back);
+                min.SetPosition(0, character.cachedTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.minScopeAngle, character.cachedTransform.forward) * lookAt;
-                min.SetPosition(1, character.cachedTransform.position + direction + Vector3.back);
+                min.SetPosition(1, character.cachedTransform.position + direction);
             }
 
             {
                 max.SetVertexCount(2);
-                max.SetPosition(0, character.cachedTransform.position + Vector3.back);
+                max.SetPosition(0, character.cachedTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.maxScopeAngle, character.cachedTransform.forward) * lookAt;
-                max.SetPosition(1, character.cachedTransform.position + direction + Vector3.back);
+                max.SetPosition(1, character.cachedTransform.position + direction);
             }
 
             {
                 current.SetVertexCount(2);
-                current.SetPosition(0, character.cachedTransform.position + Vector3.back);
+                current.SetPosition(0, character.cachedTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.angle, character.cachedTransform.forward) * lookAt;
-                current.SetPosition(1, character.cachedTransform.position + direction * 2f + Vector3.back);
+                current.SetPosition(1, character.cachedTransform.position + direction * 2f);
             }
         }
     }

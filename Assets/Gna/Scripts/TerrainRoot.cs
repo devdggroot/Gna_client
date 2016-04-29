@@ -90,7 +90,7 @@ public class TerrainRoot : MonoBehaviour
             gna.Physics.RaycastHit temp = null;
             if (gna.Physics.Raycast( ray, terrains[i], ref temp))
             {
-                if (hit == null || temp.sqrDist < hit.sqrDist)
+                if (hit == null || temp.distance < hit.distance)
                     hit = temp;
             }
         }
