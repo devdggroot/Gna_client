@@ -23,6 +23,20 @@ namespace gna
             while (root != null && root.childCount > 0)
                 GameObject.DestroyImmediate(root.GetChild(0).gameObject);
         }
+
+        public static Transform AddChild(Transform child, Transform parent)
+        {
+            if (child != null)
+            {
+                child.parent = parent;
+
+                child.localPosition = Vector3.zero;
+                child.localScale = Vector3.one;
+                child.localRotation = Quaternion.identity;
+            }
+
+            return child;
+        }
     }
 }
 

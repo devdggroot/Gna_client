@@ -7,14 +7,16 @@ public class Body : CachedTransform
     [HideInInspector]
     public float COR = 0f; //coefficient of restitution
     [HideInInspector]
-    public float GravityScale = 1;
+    public float GravityScale = 1f;
 
+    public float mass = 1f;
+    public float radius = 1f;
+
+    //variable
     [HideInInspector]
     public Vector3 acceleration;
     [HideInInspector]
     public Vector3 velocity;
-
-    public float radius = 1f;
 
     public enum State
     {
@@ -29,9 +31,6 @@ public class Body : CachedTransform
     protected override void Start()
     {
         base.Start();
-
-        acceleration = Vector3.zero;
-        velocity = Vector3.zero;
     }
 
     protected override void OnDestroy()

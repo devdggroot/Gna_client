@@ -1,23 +1,34 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CachedTransform : MonoBehaviour {
+public class CachedTransform : MonoBehaviour
+{
+    Transform _cachedTransform;
+    public Transform cachedTransform //{ get; private set; }
+    {
+        get
+        {
+            if (_cachedTransform == null)
+                _cachedTransform = transform;
 
-    public Transform cachedTransform { get; private set; }
+            return _cachedTransform;
+        }
+    }
 
     // Use this for initialization
     protected virtual void Start()
     {
-        cachedTransform = transform;
+        _cachedTransform = transform;
     }
 
     protected virtual void OnDestroy()
     {
-        cachedTransform = null;
+        _cachedTransform = null;
     }
 
     // Update is called once per frame
-    void Update () {
-	
-	}
+    /*void Update()
+    {
+
+    }*/
 }

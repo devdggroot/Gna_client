@@ -10,9 +10,9 @@ public class Character : Body
     public float minScopeAngle = -10f;
     public float maxScopeAngle = 40f;
 
+    //variable
     [HideInInspector]
     public Vector3 up;
-
     [HideInInspector]
     public float movement;
     [HideInInspector]
@@ -34,6 +34,27 @@ public class Character : Body
     /*void Update () {
 	
 	}*/
+
+    public void Fire(float force)
+    {
+        GameObject go = Resources.Load("Prefabs/Projectile") as GameObject;
+        if (go != null)
+        {
+            go = GameObject.Instantiate(go) as GameObject;
+            gna.Factory.AddChild(go.transform, ProjectileRoot.instance.transform);
+
+            Projectile projectile = go.GetComponent<Projectile>();
+            projectile.cachedTransform.position = cachedTransform.position;
+
+            Vector3 lookAt = Quaternion.LookRotation(cachedTransform.forward, up) * Vector3.right;
+            Vector3 direction = Quaternion.AngleAxis(angle, cachedTransform.forward) * lookAt;
+
+            Vector3 acceleration = direction * (force / projectile.mass);
+            Vector3 deltaVelocity = acceleration * Time.fixedDeltaTime;
+
+            projectile.Fire(deltaVelocity);
+        }
+    }
 
     public void Aim(Vector3 input)
     {
