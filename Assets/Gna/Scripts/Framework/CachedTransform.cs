@@ -4,7 +4,7 @@ using System.Collections;
 public class CachedTransform : MonoBehaviour
 {
     Transform _cachedTransform;
-    public Transform cachedTransform //{ get; private set; }
+    public Transform cachedTransform
     {
         get
         {

@@ -5,7 +5,7 @@ namespace gna
 {
     public static class Factory
     {
-        public static GameObject CreateGameObject(string name, Transform parent = null)
+        public static Transform Create(string name, Transform parent = null)
         {
             GameObject go = new GameObject(name);
 
@@ -15,7 +15,7 @@ namespace gna
             transform.localPosition = Vector3.zero;
             transform.localScale = Vector3.one;
 
-            return go;
+            return go.transform;
         }
 
         public static void DestroyAllChild(Transform root)
@@ -36,6 +36,23 @@ namespace gna
             }
 
             return child;
+        }
+
+        public static Transform Search(string name, Transform root)
+        {
+            if (root != null)
+            {
+                if (root.name == name)
+                    return root;
+
+                for ( int i = 0, imax = root.childCount; i < imax; ++i)
+                {
+                    Transform transform = Search(name, root.GetChild(i));
+                    if (transform != null)
+                        return transform;
+                }
+            }
+            return null;
         }
     }
 }

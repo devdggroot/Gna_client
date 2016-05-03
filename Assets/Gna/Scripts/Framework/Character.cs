@@ -4,11 +4,15 @@ using System.Collections;
 public class Character : Body
 {
     //property
+    [HideInInspector]
     public float moveSpeed = 1f;
-    public float limitClimbAngle = 90f;
+    [HideInInspector]
+    public float limitClimbAngle = 60f;
 
+    [HideInInspector]
     public float minScopeAngle = -10f;
-    public float maxScopeAngle = 40f;
+    [HideInInspector]
+    public float maxScopeAngle = 45f;
 
     //variable
     [HideInInspector]
@@ -18,16 +22,33 @@ public class Character : Body
     [HideInInspector]
     public float angle = 0f;
 
+    public float centerOffset = 1f;
+    public float sensitivity = 10f;
+
     public enum LookAt
     {
         Right,
         Left,
     }
 
+    Transform _centeredTransform;
+    public Transform centeredTransform
+    {
+        get
+        {
+            if (_centeredTransform == null)
+                _centeredTransform = gna.Factory.Search("Center", cachedTransform);
+
+            return _centeredTransform;
+        }
+    }
+
     // Use this for initialization
     protected override void Start()
     {
         base.Start();
+
+        _centeredTransform = gna.Factory.Search("Center", cachedTransform);
     }
 
     // Update is called once per frame
@@ -44,10 +65,9 @@ public class Character : Body
             gna.Factory.AddChild(go.transform, ProjectileRoot.instance.transform);
 
             Projectile projectile = go.GetComponent<Projectile>();
-            projectile.cachedTransform.position = cachedTransform.position;
+            projectile.cachedTransform.position = _centeredTransform.position;
 
-            Vector3 lookAt = Quaternion.LookRotation(cachedTransform.forward, up) * Vector3.right;
-            Vector3 direction = Quaternion.AngleAxis(angle, cachedTransform.forward) * lookAt;
+            Vector3 direction = Quaternion.AngleAxis(angle, cachedTransform.forward) * _centeredTransform.right;
 
             Vector3 acceleration = direction * (force / projectile.mass);
             Vector3 deltaVelocity = acceleration * Time.fixedDeltaTime;
@@ -60,7 +80,7 @@ public class Character : Body
     {
         if (Mathf.Abs(input.y) > 0f)
         {
-            angle = Mathf.Clamp(angle + input.y, minScopeAngle, maxScopeAngle);
+            angle = Mathf.Clamp(angle + (sensitivity > 0f ? input.y / sensitivity : input.y), minScopeAngle, maxScopeAngle);
         }
     }
 
@@ -72,10 +92,12 @@ public class Character : Body
         }
     }
 
-    Vector3 UpdateLookAt(Vector3 up)
+    Vector3 UpdateCenter(Vector3 normal)
     {
-        cachedTransform.rotation = Quaternion.LookRotation(cachedTransform.forward, up);
-        return cachedTransform.right;
+        _centeredTransform.rotation = Quaternion.LookRotation(cachedTransform.forward, normal);
+        _centeredTransform.position = cachedTransform.position + _centeredTransform.up * centerOffset;
+
+        return _centeredTransform.right;
     }
 
     Vector3 UpdateLookAt(LookAt lookAt)
@@ -98,9 +120,10 @@ public class Character : Body
             else if (normal.y <= float.Epsilon)
             {
                 normal = Vector3.up;
-            }/*exception*/
+            }/*exception(if one line pixel, normal is incorrect.)*/
 
             up = normal;
+            UpdateCenter(up);
 
             if (Mathf.Abs(movement) > 0f)
             {
@@ -160,6 +183,7 @@ public class Character : Body
         else if (state == State.Airborne)
         {
             up = Vector3.up;
+            UpdateCenter(up);
 
             if (Mathf.Abs(movement) > 0f)
             {

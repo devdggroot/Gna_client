@@ -35,12 +35,12 @@ public class CharacterControllerInput : MonoBehaviour
                 isPressed = true;
             }
 
-            if (Input.GetButtonUp("Jump"))
+            if (Input.GetButtonUp("Jump") && isPressed)
             {
                 isPressed = false;
 
-                float ratio = Mathf.InverseLerp(0f, 2f, accumulatedTime);
-                character.Fire(Mathf.Lerp(10f, 500f, ratio)); //0f~500f
+                float ratio = Mathf.InverseLerp(0f, 1f, accumulatedTime);
+                character.Fire(Mathf.Lerp(1f, 1000f, ratio));
 
                 accumulatedTime = 0f;
             }
@@ -48,8 +48,15 @@ public class CharacterControllerInput : MonoBehaviour
             if (isPressed)
             {
                 accumulatedTime += Time.deltaTime;
-                if (accumulatedTime > 2f)
-                    accumulatedTime = 2f;
+                if (accumulatedTime > 1f)
+                {
+                    isPressed = false;
+
+                    float ratio = Mathf.InverseLerp(0f, 1f, accumulatedTime);
+                    character.Fire(Mathf.Lerp(10f, 1000f, ratio));
+
+                    accumulatedTime = 0f;
+                }
             }
 #endif
         }

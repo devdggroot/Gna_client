@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(DestructibleTerrain))]
-public class DestructibleTerrainInspector : Editor
+public class DestructibleTerrainEditor : Editor
 {
     DestructibleTerrain destructibleTerrain;
 

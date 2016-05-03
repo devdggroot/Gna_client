@@ -2,10 +2,10 @@
 using System.Collections;
 
 [RequireComponent(typeof(Character))]
-public class FireScope : MonoBehaviour
+public class Scope : MonoBehaviour
 {
     Character character;
-    GameObject root;
+    Transform root;
 
     LineRenderer min;
     LineRenderer max;
@@ -16,7 +16,7 @@ public class FireScope : MonoBehaviour
         if(root != null)
         {
             gna.Factory.DestroyAllChild(root.transform);
-            DestroyImmediate(root);
+            DestroyImmediate(root.gameObject);
         }
 
         character = null;
@@ -27,15 +27,15 @@ public class FireScope : MonoBehaviour
     {
         character = GetComponent<Character>();
 
-        root = gna.Factory.CreateGameObject("[Scope] Root", transform);
+        root = gna.Factory.Create("Scope", character.centeredTransform);
 
-        min = gna.Factory.CreateGameObject("min", root.transform).AddComponent<LineRenderer>();
+        min = gna.Factory.Create("min", root).gameObject.AddComponent<LineRenderer>();
         min.SetWidth(0.04f, 0.04f);
 
-        max = gna.Factory.CreateGameObject("max", root.transform).AddComponent<LineRenderer>();
+        max = gna.Factory.Create("max", root).gameObject.AddComponent<LineRenderer>();
         max.SetWidth(0.04f, 0.04f);
 
-        current = gna.Factory.CreateGameObject("current", root.transform).AddComponent<LineRenderer>();
+        current = gna.Factory.Create("current", root).gameObject.AddComponent<LineRenderer>();
         current.SetWidth(0.02f, 0.02f);
     }
 
@@ -48,26 +48,26 @@ public class FireScope : MonoBehaviour
 
             {
                 min.SetVertexCount(2);
-                min.SetPosition(0, character.cachedTransform.position);
+                min.SetPosition(0, character.centeredTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.minScopeAngle, character.cachedTransform.forward) * lookAt;
-                min.SetPosition(1, character.cachedTransform.position + direction);
+                min.SetPosition(1, character.centeredTransform.position + direction);
             }
 
             {
                 max.SetVertexCount(2);
-                max.SetPosition(0, character.cachedTransform.position);
+                max.SetPosition(0, character.centeredTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.maxScopeAngle, character.cachedTransform.forward) * lookAt;
-                max.SetPosition(1, character.cachedTransform.position + direction);
+                max.SetPosition(1, character.centeredTransform.position + direction);
             }
 
             {
                 current.SetVertexCount(2);
-                current.SetPosition(0, character.cachedTransform.position);
+                current.SetPosition(0, character.centeredTransform.position);
 
                 Vector3 direction = Quaternion.AngleAxis(character.angle, character.cachedTransform.forward) * lookAt;
-                current.SetPosition(1, character.cachedTransform.position + direction * 2f);
+                current.SetPosition(1, character.centeredTransform.position + direction * 2f);
             }
         }
     }

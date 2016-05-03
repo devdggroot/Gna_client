@@ -12,7 +12,8 @@ public class PixelCollider : CachedTransform
     public Vector2 pivot { get; private set; }
     public float pixelsPerUnit { get; private set; }
 
-    public Color[] pixels { get; protected set; }
+    [HideInInspector]
+    public Color[] pixels;
 
     // Use this for initialization
     protected override void Start()

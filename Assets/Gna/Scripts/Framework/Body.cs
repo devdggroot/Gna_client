@@ -9,7 +9,9 @@ public class Body : CachedTransform
     [HideInInspector]
     public float GravityScale = 1f;
 
+    [HideInInspector]
     public float mass = 1f;
+    [HideInInspector]
     public float radius = 1f;
 
     //variable
@@ -18,6 +20,7 @@ public class Body : CachedTransform
     [HideInInspector]
     public Vector3 velocity;
 
+    [System.Serializable]
     public enum State
     {
         Ground,
@@ -96,4 +99,12 @@ public class Body : CachedTransform
         //Time.deltaTime == Time.fixedDeltaTime
         //Time.fixedTime : total fiexdTime
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(cachedTransform.position, radius);
+    }
+#endif
 }
