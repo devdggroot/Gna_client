@@ -23,39 +23,42 @@ public class CharacterControllerInput : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (character != null && character.state == Body.State.Ground)
+        if (character != null)
         {
 #if UNITY_EDITOR
             Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
             character.Move(input);
             character.Aim(input);
 
-            if (Input.GetButtonDown("Jump"))
+            if (character.state == Body.State.Ground)
             {
-                isPressed = true;
-            }
+                if (Input.GetButtonDown("Jump"))
+                {
+                    isPressed = true;
+                }
 
-            if (Input.GetButtonUp("Jump") && isPressed)
-            {
-                isPressed = false;
-
-                float ratio = Mathf.InverseLerp(0f, 1f, accumulatedTime);
-                character.Fire(Mathf.Lerp(1f, 1000f, ratio));
-
-                accumulatedTime = 0f;
-            }
-
-            if (isPressed)
-            {
-                accumulatedTime += Time.deltaTime;
-                if (accumulatedTime > 1f)
+                if (Input.GetButtonUp("Jump") && isPressed)
                 {
                     isPressed = false;
 
                     float ratio = Mathf.InverseLerp(0f, 1f, accumulatedTime);
-                    character.Fire(Mathf.Lerp(10f, 1000f, ratio));
+                    character.Fire(Mathf.Lerp(1f, 1000f, ratio));
 
                     accumulatedTime = 0f;
+                }
+
+                if (isPressed)
+                {
+                    accumulatedTime += Time.deltaTime;
+                    if (accumulatedTime > 1f)
+                    {
+                        isPressed = false;
+
+                        float ratio = Mathf.InverseLerp(0f, 1f, accumulatedTime);
+                        character.Fire(Mathf.Lerp(10f, 1000f, ratio));
+
+                        accumulatedTime = 0f;
+                    }
                 }
             }
 #endif

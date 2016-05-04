@@ -56,11 +56,12 @@ public class Body : CachedTransform
 
         Vector3 deltaMovement = velocity * Time.deltaTime;
 
-        Vector3 rayStart = cachedTransform.position;
-        Vector3 rayEnd = cachedTransform.position + (deltaMovement.normalized * radius) + deltaMovement;
+        Vector3 origin = cachedTransform.position;
+        Vector3 direction = deltaMovement.normalized;// cachedTransform.position + (deltaMovement.normalized * radius) + deltaMovement;
+        float length = radius + deltaMovement.magnitude;
 
-        Debug.DrawRay(rayStart, rayEnd - rayStart, Color.red);
-        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+        Debug.DrawRay(origin, direction * length, Color.red);
+        if (TerrainRoot.instance.Raycast(origin, direction, length, out hit))
         {
             Vector3 normal = hit.normal;
             if (hit.normal.sqrMagnitude <= float.Epsilon)

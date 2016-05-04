@@ -80,21 +80,23 @@ public class TerrainRoot : MonoBehaviour
     ///<summary>
     ///Raycast root's child terrains and find shortest hit distance object.
     ///</summary>
-    ///<param name="start">world coordinate.</param>
-    ///<param name="end">world coordinate.</param>
-    public bool Raycast(gna.Physics.Ray ray, ref gna.Physics.RaycastHit hit)
+    ///<param name="origin">world coordinate.</param>
+    ///<param name="direction">...</param>
+    ///<param name="length">...</param>
+    ///<param name="hit">hit info</param>
+    public bool Raycast(Vector3 origin, Vector3 direction, float length, out gna.Physics.RaycastHit hit)
     {
         hit = null;
         for (int i = 0, imax = terrains.Length; i < imax; ++i)
         {
-            gna.Physics.RaycastHit temp = null;
-            if (gna.Physics.Raycast( ray, terrains[i], ref temp))
+            gna.Physics.RaycastHit temp;
+            if (gna.Physics.Raycast(origin, direction, length, terrains[i], out temp))
             {
                 if (hit == null || temp.distance < hit.distance)
                     hit = temp;
             }
         }
 
-        return hit != null ? true : false;
+        return hit != null;
     }
 }

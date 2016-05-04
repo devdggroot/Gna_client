@@ -8,57 +8,57 @@ namespace gna
         public const float gravity = -9.8f;
         public const float velocityEpsilon = 0.00001f;
 
-
         public class Ray
         {
-            public Vector3 dir { get; private set; }
-
-            public Vector3 start { get; private set; }
-            public Vector3 end { get; private set; }
+            public Vector3 origin { get; private set; }
+            public Vector3 direction { get; private set; }
+            public float length { get; private set;}
+            
+            public Vector3 destination { get; private set; }
 
             public Ray(Vector3 start, Vector3 end)
             {
-                dir = end - start;
-                dir.Normalize();
+                direction = (end - start).normalized;
 
-                this.start = start;
-                this.end = end;
+                origin = start;
+                destination = end;
+
+                length = Vector3.Distance(origin, destination);
+            }
+
+            public Ray(Vector3 origin, Vector3 direction, float length)
+            {
+                destination = origin + direction * length;
+
+                this.origin = origin;
+                this.direction = direction;
+                this.length = length;
             }
         }
 
         public class RaycastHit
         {
-            public Ray ray { get; private set; }
-            public PixelCollider pixelCollider { get; private set; }
+            public Ray ray;
+            public PixelCollider collider;
 
             public Vector3 point { get; private set; }
             public Vector3 normal { get; private set; }
 
             public float distance { get; private set; }
 
-            public RaycastHit( Ray ray, PixelCollider pixelCollider, Vector3 point, Vector3 normal)
+            public RaycastHit(PixelCollider collider, Vector3 point, Vector3 normal, float distance)
             {
-                this.ray = ray;
-                this.pixelCollider = pixelCollider;
+                this.collider = collider;
 
                 this.point = point;
                 this.normal = normal;
 
-                this.distance = Vector3.Distance(ray.start, point);
+                this.distance = distance;
             }
         }
 
-        public static bool Raycast( Ray ray, PixelCollider pixelCollider, ref RaycastHit hit)
+        public static bool Raycast(int startX, int startY, int endX, int endY, PixelCollider collider, out RaycastHit hit)
         {
-            Vector3 start = pixelCollider.cachedTransform.InverseTransformPoint(ray.start);
-            Vector3 end = pixelCollider.cachedTransform.InverseTransformPoint(ray.end);
-
-            int startX = Mathf.RoundToInt(start.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
-            int startY = Mathf.RoundToInt(start.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
-
-            int endX = Mathf.RoundToInt(end.x * pixelCollider.pixelsPerUnit + pixelCollider.pivot.x);
-            int endY = Mathf.RoundToInt(end.y * pixelCollider.pixelsPerUnit + pixelCollider.pivot.y);
-
             int deltaX = Mathf.Abs(endX - startX);
             int deltaY = Mathf.Abs(endY - startY);
 
@@ -110,21 +110,18 @@ namespace gna
 
             for (int curpixel = 0; curpixel <= numpixels; curpixel++)
             {
-                if (x >= 0 && x < pixelCollider.width && y >= 0 && y < pixelCollider.height)
+                if (x >= 0 && x < collider.width && y >= 0 && y < collider.height)
                 {
-                    int idx = x + y * pixelCollider.width;
-                    if (idx < pixelCollider.pixels.Length && pixelCollider.pixels[idx].a > 0f)
-                    {//hit
-                        Vector3 point = Vector3.zero;
-                        point.x = (x - pixelCollider.pivot.x) / pixelCollider.pixelsPerUnit;
-                        point.y = (y - pixelCollider.pivot.y) / pixelCollider.pixelsPerUnit;
-                        point = pixelCollider.cachedTransform.TransformPoint(point);
+                    int idx = x + y * collider.width;
+                    if (idx < collider.pixels.Length && collider.pixels[idx].a > 0f)
+                    {
+                        Vector3 point = new Vector3((x - collider.pivot.x) / collider.pixelsPerUnit, (y - collider.pivot.y) / collider.pixelsPerUnit);
+                        point = collider.cachedTransform.TransformPoint(point);
 
-                        //float xDiff = (x - startX) / pixelCollider.pixelsPerUnit;
-                        //float yDiff = (y - startY) / pixelCollider.pixelsPerUnit;
-                        //float sqrDist = (xDiff * xDiff + yDiff * yDiff);
+                        Vector3 origin = new Vector3((startX - collider.pivot.x) / collider.pixelsPerUnit, (startY - collider.pivot.y) / collider.pixelsPerUnit);
+                        origin = collider.cachedTransform.TransformPoint(origin);
 
-                        hit = new RaycastHit( ray, pixelCollider, point, pixelCollider.NormalAt(x, y));
+                        hit = new RaycastHit(collider, point, collider.NormalAt(x, y), Vector3.Distance(origin, point));
                         return true;
                     }
                 }
@@ -147,6 +144,30 @@ namespace gna
 
             hit = null;
             return false; // nothing was found
+        }
+
+        public static bool Raycast(Ray ray, PixelCollider collider, out RaycastHit hit)
+        {
+            Vector3 start = collider.cachedTransform.InverseTransformPoint(ray.origin);
+            Vector3 end = collider.cachedTransform.InverseTransformPoint(ray.destination);
+
+            int startX = Mathf.RoundToInt(start.x * collider.pixelsPerUnit + collider.pivot.x);
+            int startY = Mathf.RoundToInt(start.y * collider.pixelsPerUnit + collider.pivot.y);
+
+            int endX = Mathf.RoundToInt(end.x * collider.pixelsPerUnit + collider.pivot.x);
+            int endY = Mathf.RoundToInt(end.y * collider.pixelsPerUnit + collider.pivot.y);
+
+            if (Raycast(startX, startY, endX, endY, collider, out hit))
+            {
+                hit.ray = ray;
+            }
+            
+            return hit != null;
+        }
+
+        public static bool Raycast(Vector3 origin, Vector3 direction, float length, PixelCollider collider, out RaycastHit hit)
+        {
+            return Raycast(new Ray(origin, direction, length), collider, out hit);
         }
     }
 }

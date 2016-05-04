@@ -58,8 +58,8 @@ public class TerrainDestructor : MonoBehaviour
 
         if (Input.GetMouseButton/*Down*/(1))
         {
-            gna.Physics.RaycastHit hit = null;
-            if (TerrainRoot.instance.Raycast( new gna.Physics.Ray(pos, new Vector3(pos.x, pos.y - 1000f, 0f)), ref hit))
+            gna.Physics.RaycastHit hit;
+            if (TerrainRoot.instance.Raycast( pos, Vector3.down, 1000f, out hit))
             {
                 Vector3 end = hit.point + hit.normal * 2f;
                 Debug.DrawRay(hit.point, end - hit.point, Color.red);

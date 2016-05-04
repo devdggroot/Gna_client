@@ -123,7 +123,6 @@ public class Character : Body
             }/*exception(if one line pixel, normal is incorrect.)*/
 
             up = normal;
-            UpdateCenter(up);
 
             if (Mathf.Abs(movement) > 0f)
             {
@@ -135,11 +134,12 @@ public class Character : Body
                     Vector3 deltaMovement = lookAt * Mathf.Abs(movement) * Time.deltaTime;
                     deltaMovement.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * deltaMovement.x;
 
-                    Vector3 rayStart = cachedTransform.position;
-                    Vector3 rayEnd = cachedTransform.position + deltaMovement;
+                    Vector3 origin = cachedTransform.position;
+                    Vector3 direction = deltaMovement.normalized;
+                    float length = deltaMovement.magnitude;
 
-                    Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
-                    if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                    Debug.DrawRay(origin, direction * length, Color.green);
+                    if (TerrainRoot.instance.Raycast(origin, direction, length, out hit))
                     {
                         float distance = (float)System.Math.Round(hit.distance, 3, System.MidpointRounding.AwayFromZero);
                         if (distance > radius)
@@ -152,43 +152,48 @@ public class Character : Body
                         }
                     }
 
-                    rayStart = cachedTransform.position + deltaMovement;
-                    rayEnd = rayStart + Vector3.down * (radius + radius);
+                    origin = cachedTransform.position + deltaMovement;
+                    direction = Vector3.down;
+                    length = radius + radius;
 
-                    Debug.DrawRay(rayStart, rayEnd - rayStart, Color.green);
-                    if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                    Debug.DrawRay(origin, direction * length, Color.green);
+                    if (TerrainRoot.instance.Raycast(origin, direction, length, out hit))
                     {
                         float distance = (float)System.Math.Round(hit.distance, 3, System.MidpointRounding.AwayFromZero);
                         deltaMovement += Vector3.down * (distance - radius);
 
                         //check 
-                        rayStart = cachedTransform.position + deltaMovement;
-                        rayEnd = rayStart + Vector3.down * radius;
+                        /*origin = cachedTransform.position + deltaMovement;
+                        direction = Vector3.down;
+                        length = radius;
 
-                        Debug.DrawRay(rayStart, rayEnd - rayStart, Color.blue);
-                        if (TerrainRoot.instance.Raycast(new gna.Physics.Ray(rayStart, rayEnd), ref hit))
+                        Debug.DrawRay(origin, direction * length, Color.blue);
+                        if (TerrainRoot.instance.Raycast(origin, direction, length, out hit))
                         {
                             distance = (float)System.Math.Round(hit.distance, 3, System.MidpointRounding.AwayFromZero);
                             if (distance < radius)
                             {
                                 deltaMovement = Vector3.zero;
                             }
-                        }
+                        }*/
                     }
 
                     cachedTransform.position = cachedTransform.position + deltaMovement;
                 }
             }
+
+            UpdateCenter(up);
         }
         else if (state == State.Airborne)
         {
             up = Vector3.up;
-            UpdateCenter(up);
 
             if (Mathf.Abs(movement) > 0f)
             {
                 UpdateLookAt(Mathf.Sign(movement) > 0f ? LookAt.Right : LookAt.Left);
             }
+
+            UpdateCenter(up);
         }
 
         movement = 0f;
